@@ -1,0 +1,8 @@
+{
+  "name": "hotel-report",
+  "version": "1.0.0",
+  "description": "Hotel Report - Excelsior Hotel Gallia",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,274 @@
+{
+  "insights": {
+    "issue": "Le criticità più rilevanti riguardano la gestione degli oggetti smarriti o dimenticati in camera, percepita come poco affidabile e non supportiva, e una gestione reclami spesso fredda, con promesse di richiamo non mantenute. Emergono inoltre problemi di fatturazione e addebiti non riconosciuti, con verifiche lente e comunicazione talvolta poco empatica, anche da parte del management. Alcune camere presentano disservizi manutentivi su bagni, odori, rumori delle tubature e comfort termico. In ambito F&B compaiono segnalazioni su colazione non allineata allo standard atteso e consumazioni al bar pagate in situazioni di disservizio, con impatto diretto sulla percezione di correttezza.",
+    "highlight": "Nel complesso del mese, gli ospiti esprimono un apprezzamento costante per la posizione strategica di fronte alla stazione centrale e ai collegamenti con aeroporto e città vicine. La pulizia delle camere e delle aree comuni viene più volte descritta come molto accurata e stabile nel tempo. Il personale è spesso percepito come cordiale, professionale e disponibile, con citazioni specifiche per attenzioni personalizzate, riconoscimento dei membri fedeltà e gestione di occasioni speciali. Spa, palestra e aree benessere risultano punti di forza riconosciuti, così come la qualità generale della colazione e del bar, che in diversi casi viene considerata coerente con una struttura di fascia alta.",
+    "strengths": [
+      {
+        "rank": 1,
+        "phrase": "Posizione di fronte alla stazione centrale con collegamenti rapidi a treni, bus e aeroporti vicini.",
+        "rank_reason": "alta frequenza; impatto forte sulla scelta dell’hotel e sulla praticità degli spostamenti",
+        "subCategory": "Accessibility"
+      },
+      {
+        "rank": 2,
+        "phrase": "Pulizia di camere e aree comuni costante, con ambienti percepiti come curati, ordinati e ben mantenuti.",
+        "rank_reason": "menzioni ricorrenti; contribuisce in modo decisivo alla percezione di struttura di alto livello",
+        "subCategory": "Room hygiene"
+      },
+      {
+        "rank": 3,
+        "phrase": "Personale di front office e servizio generale spesso descritto come cordiale, professionale e disponibile.",
+        "rank_reason": "feedback in più periodi; influenza diretta sulla soddisfazione e sul desiderio di tornare",
+        "subCategory": "Service and efficiency"
+      },
+      {
+        "rank": 4,
+        "phrase": "Spa, palestra e area benessere silenziose e ben gestite, vissute come esperienza rilassante e qualificante.",
+        "rank_reason": "commenti molto positivi; forte valore percepito per ospiti leisure e business",
+        "subCategory": "Spa"
+      },
+      {
+        "rank": 5,
+        "phrase": "Colazione a buffet e offerta bar spesso valutate di buona qualità, con prodotti curati e servizio attento.",
+        "rank_reason": "apprezzamenti espliciti; contribuisce in modo importante alla percezione complessiva del soggiorno",
+        "subCategory": "Breakfast"
+      }
+    ],
+    "improvements": [
+      {
+        "rank": 1,
+        "phrase": "Gestione di oggetti smarriti o dimenticati in camera percepita come poco trasparente, lenta e poco collaborativa.",
+        "rank_reason": "forte severità; impatta fiducia, senso di sicurezza e reputazione complessiva della struttura",
+        "subCategory": "Complaints & Feedback"
+      },
+      {
+        "rank": 2,
+        "phrase": "Gestione reclami e richieste urgenti spesso fredda, con promesse di richiamo non seguite da azioni concrete.",
+        "rank_reason": "ricorrenza in più settimane; influenza diretta sulla fidelizzazione e sulla percezione di attenzione",
+        "subCategory": "Complaints & Feedback"
+      },
+      {
+        "rank": 3,
+        "phrase": "Addebiti non riconosciuti e processi di verifica fatturazione lenti, con spiegazioni poco chiare fornite agli ospiti.",
+        "rank_reason": "alta gravità potenziale; rischio finanziario e reputazionale, con impatto sulla percezione di correttezza",
+        "subCategory": "Billing"
+      },
+      {
+        "rank": 4,
+        "phrase": "Manutenzione di bagni e impianti idraulici non sempre adeguata, con perdite, odori e rumori segnalati in alcune camere.",
+        "rank_reason": "severità elevata; incide su comfort, igiene percepita e coerenza con posizionamento cinque stelle",
+        "subCategory": "Bathroom hygiene"
+      },
+      {
+        "rank": 5,
+        "phrase": "Qualità e coerenza della colazione e del servizio bar talvolta inferiori alle aspettative per categoria cinque stelle.",
+        "rank_reason": "tema trasversale; influenza la valutazione del valore pagato e dell’esperienza complessiva",
+        "subCategory": "Breakfast"
+      }
+    ],
+    "trend_insights": "Nel corso del mese, la soddisfazione per posizione, pulizia e aree benessere rimane costante e alta. Nelle prime settimane emergono con forza criticità su gestione oggetti smarriti, reclami e addebiti, che riaffiorano anche successivamente senza segnali di miglioramento strutturale. Il comfort camera e l’isolamento acustico mostrano commenti alternati, con episodi di camere fredde e rumori che si ripetono. Il comparto colazione e bar registra un andamento misto: alcune esperienze deludenti vengono compensate da feedback molto positivi nelle settimane centrali e finali, mantenendo però una percezione complessiva non del tutto omogenea.",
+    "category_summary": [
+      {
+        "score": 8.5,
+        "trend": "La percezione della posizione è rimasta molto positiva durante tutto il mese, mentre le segnalazioni sul rumore ferroviario sono comparse in modo sporadico senza mostrare cambiamenti significativi nel periodo.",
+        "category": "Location & Neighbourhood",
+        "negative": "In alcune recensioni la vicinanza ai binari genera rumore notturno fastidioso, che compromette il sonno di ospiti sensibili.",
+        "positive": "La posizione di fronte alla stazione centrale e vicino a bus aeroportuali è costantemente apprezzata; la navetta gratuita verso il centro rafforza la percezione di praticità.",
+        "count_total": 13,
+        "count_neutral": 1,
+        "count_negative": 0,
+        "count_positive": 12
+      },
+      {
+        "score": 8.1,
+        "trend": "I commenti indicano un livello di pulizia generalmente molto alto e stabile, con poche criticità puntuali che non modificano la percezione complessiva nel corso del mese.",
+        "category": "Cleanliness",
+        "negative": "Sono emersi alcuni casi isolati di capelli su biancheria, macchie nel box doccia e odori sgradevoli dal WC.",
+        "positive": "Pulizia delle camere e delle aree comuni viene descritta come eccellente e costante, con ambienti ordinati e ben mantenuti.",
+        "count_total": 10,
+        "count_neutral": 1,
+        "count_negative": 1,
+        "count_positive": 8
+      },
+      {
+        "score": 7.5,
+        "trend": "Il comfort camera mostra un andamento misto: molti commenti restano positivi, ma le criticità su temperatura, rumore e layout riemergono in più settimane senza un miglioramento evidente.",
+        "category": "Room Comfort",
+        "negative": "Alcuni ospiti segnalano camere fredde, insonorizzazione insufficiente, layout di suite poco funzionali e rumori da tubature.",
+        "positive": "Camere spesso percepite come spaziose, confortevoli e ben arredate, con turndown service e buona vista sulla stazione.",
+        "count_total": 16,
+        "count_neutral": 1,
+        "count_negative": 4,
+        "count_positive": 11
+      },
+      {
+        "score": 8.4,
+        "trend": "Servizi e atmosfera mantengono un profilo complessivamente positivo e stabile; le poche segnalazioni negative risultano episodiche e non mostrano un peggioramento progressivo nel mese.",
+        "category": "Hotel Amenities & Atmosphere",
+        "negative": "Alcuni ospiti evidenziano parti di camere un po’ usurate e un evento natalizio senza atmosfera coerente con la comunicazione.",
+        "positive": "Spa, palestra e piscina sono valutate molto positivamente; l’atmosfera generale viene percepita elegante e adatta a soggiorni di coppia o business.",
+        "count_total": 10,
+        "count_neutral": 2,
+        "count_negative": 0,
+        "count_positive": 8
+      },
+      {
+        "score": 6.0,
+        "trend": "La percezione F&B è variabile: le prime settimane mostrano episodi critici su colazione e bar, mentre in seguito prevalgono commenti più positivi, senza però eliminare del tutto le perplessità su coerenza di standard.",
+        "category": "Food & Beverage",
+        "negative": "Emergono critiche su uova strapazzate percepite industriali, scelta colazione limitata, personale poco strutturato e consumazioni pagate in situazione di disservizio.",
+        "positive": "Colazione e bar sono spesso descritti come di buona qualità, con prodotti curati e servizio attento in più occasioni.",
+        "count_total": 8,
+        "count_neutral": 0,
+        "count_negative": 4,
+        "count_positive": 4
+      },
+      {
+        "score": 7.0,
+        "trend": "L’esperienza ospite presenta un andamento altalenante: la maggioranza delle recensioni rimane positiva, ma le criticità su reclami, follow-up e interazioni manageriali si ripetono in diverse settimane senza segnali chiari di miglioramento.",
+        "category": "Guest Experience & Service",
+        "negative": "Persistono segnalazioni su gestione reclami poco empatica, supporto quasi assente per oggetti smarriti e alcuni episodi di manager percepiti come scortesi.",
+        "positive": "Molti ospiti riportano personale cordiale e professionale, con attenzioni personalizzate, upgrade, sorprese per occasioni speciali e buon servizio in camera.",
+        "count_total": 30,
+        "count_neutral": 2,
+        "count_negative": 9,
+        "count_positive": 19
+      },
+      {
+        "score": 5.8,
+        "trend": "La percezione del rapporto qualità-prezzo rimane divisa: le opinioni favorevoli e critiche si alternano senza mostrare una tendenza netta, riflettendo esperienze molto influenzate dalla gestione dei singoli disservizi.",
+        "category": "Value for Money",
+        "negative": "Altri ospiti percepiscono il prezzo non allineato a customer care, gestione reclami, colazione e addebiti non chiari.",
+        "positive": "Alcuni ospiti dichiarano che servizi, posizione e struttura risultano coerenti o superiori alle aspettative rispetto alle tariffe.",
+        "count_total": 6,
+        "count_neutral": 1,
+        "count_negative": 3,
+        "count_positive": 2
+      },
+      {
+        "score": 0.0,
+        "trend": "Il feedback diretto sulla coerenza di brand è limitato e frammentato; non emerge un andamento chiaro né variazioni significative tra le settimane del mese.",
+        "category": "Brand Consistency & Expression",
+        "negative": "-",
+        "positive": "-",
+        "count_total": 0,
+        "count_neutral": 0,
+        "count_negative": 0,
+        "count_positive": 0
+      }
+    ]
+  },
+  "solution": {
+    "overall": "La direzione dovrebbe consolidare i punti di forza legati a posizione, pulizia, spa/palestra e professionalità di gran parte dello staff, utilizzando questi elementi come riferimento per lo standard complessivo. In parallelo è prioritario strutturare procedure chiare e tracciate per la gestione di oggetti smarriti, dei reclami e della fatturazione, così da ridurre episodi di sfiducia e percezioni di scarsa trasparenza. È necessario rafforzare il controllo operativo su comfort camera, manutenzione bagni e coerenza dell’offerta colazione con il posizionamento cinque stelle. La formazione manageriale sulla comunicazione in situazioni critiche e il monitoraggio sistematico dei follow-up completeranno l’allineamento tra livello di servizio atteso e percepito dagli ospiti.",
+    "category_solutions": [
+      {
+        "action": "Standardizzare, al momento del check-in, una breve informativa su posizione, possibili rumori lato binari e disponibilità di camere più silenziose, così da gestire le aspettative degli ospiti sensibili. Front office e prenotazioni dovrebbero annotare in scheda preferenze sul rumore e coordinare l’assegnazione con il reparto camere in fase di planning.",
+        "category": "Location & Neighbourhood"
+      },
+      {
+        "action": "Rafforzare le checklist finali di housekeeping includendo controlli visivi obbligatori su biancheria, box doccia e odori da toilette, con verifiche a campione quotidiane svolte dai supervisori. Registrare eventuali non conformità in un log interno e discutere i casi ricorrenti nei briefing di reparto per correggere rapidamente le cause operative.",
+        "category": "Cleanliness"
+      },
+      {
+        "action": "Introdurre un controllo programmato su riscaldamento, insonorizzazione percepita e funzionalità delle docce, documentando gli esiti per camera. In caso di disservizio termico o disturbo da rumore, prevedere una procedura chiara che includa cambio camera prioritario o soluzione alternativa e gestione di eventuali cortesie di compensazione definite a priori dalla direzione.",
+        "category": "Room Comfort"
+      },
+      {
+        "action": "Definire per ogni evento o proposta a tema (come iniziative natalizie) un semplice piano operativo con elementi minimi obbligatori: decorazioni, musica coerente e comunicazione interna chiara. Il responsabile F&B e il duty manager dovrebbero verificare, tramite check visivi, che l’atmosfera in sala corrisponda a quanto comunicato ai clienti.",
+        "category": "Hotel Amenities & Atmosphere"
+      },
+      {
+        "action": "Rivedere la proposta colazione partendo dagli elementi più criticati, come le uova strapazzate, verificando ingredienti e modalità di preparazione e privilegiando soluzioni fresche. Introdurre brevi osservazioni di sala e domande mirate agli ospiti per monitorare qualità percepita e varietà, e programmare sessioni periodiche di coaching sul servizio per il personale di breakfast e bar.",
+        "category": "Food & Beverage"
+      },
+      {
+        "action": "Standardizzare una procedura unica per reclami e oggetti smarriti che preveda registrazione immediata, numero di pratica interno e tempi massimi di risposta. Formare front desk e manager sulla comunicazione empatica e sui follow-up, con controlli periodici delle pratiche aperte per assicurare che ogni promessa di richiamo sia effettivamente eseguita e documentata.",
+        "category": "Guest Experience & Service"
+      },
+      {
+        "action": "Introdurre un breve modulo di feedback post-soggiorno focalizzato su prezzo, customer care, colazione e correttezza degli addebiti, analizzando mensilmente i risultati in comitato direzionale. In base ai riscontri, adeguare le procedure di servizio e di gestione disservizi, così da ridurre i casi in cui gli ospiti percepiscono un valore inferiore alle tariffe applicate.",
+        "category": "Value for Money"
+      },
+      { "action": "-", "category": "Brand Consistency & Expression" }
+    ]
+  },
+  "data_overview": {
+    "periodEnd": "2025-12-31",
+    "hotel_name": "Excelsior Hotel Gallia, a Luxury Collection Hotel, Milan",
+    "periodStart": "2025-12-01",
+    "weeks_count": 5,
+    "total_reviews": 46
+  },
+  "category_counts": {
+    "Cleanliness": 10,
+    "Room Comfort": 16,
+    "Food & Beverage": 8,
+    "Value for Money": 6,
+    "Location & Neighbourhood": 13,
+    "Guest Experience & Service": 30,
+    "Hotel Amenities & Atmosphere": 10
+  },
+  "sentiment_summary": { "neutral": 8, "negative": 7, "positive": 22 },
+  "weekly_category_trend": [
+    {
+      "weekEnd": "2025-12-07",
+      "weekStart": "2025-12-01",
+      "category_scores": [
+        { "score": 9.0, "category": "Location & Neighbourhood" },
+        { "score": 7.6, "category": "Room Comfort" },
+        { "score": 9.5, "category": "Hotel Amenities & Atmosphere" },
+        { "score": 3.0, "category": "Food & Beverage" },
+        { "score": 5.4, "category": "Guest Experience & Service" },
+        { "score": 3.5, "category": "Value for Money" }
+      ]
+    },
+    {
+      "weekEnd": "2025-12-14",
+      "weekStart": "2025-12-08",
+      "category_scores": [
+        { "score": 7.0, "category": "Location & Neighbourhood" },
+        { "score": 9.0, "category": "Cleanliness" },
+        { "score": 7.0, "category": "Hotel Amenities & Atmosphere" },
+        { "score": 8.5, "category": "Food & Beverage" },
+        { "score": 6.0, "category": "Guest Experience & Service" }
+      ]
+    },
+    {
+      "weekEnd": "2025-12-21",
+      "weekStart": "2025-12-15",
+      "category_scores": [
+        { "score": 9.0, "category": "Location & Neighbourhood" },
+        { "score": 9.0, "category": "Cleanliness" },
+        { "score": 9.0, "category": "Room Comfort" },
+        { "score": 9.0, "category": "Hotel Amenities & Atmosphere" },
+        { "score": 6.0, "category": "Food & Beverage" },
+        { "score": 9.3, "category": "Guest Experience & Service" }
+      ]
+    },
+    {
+      "weekEnd": "2025-12-28",
+      "weekStart": "2025-12-22",
+      "category_scores": [
+        { "score": 8.7, "category": "Location & Neighbourhood" },
+        { "score": 6.8, "category": "Cleanliness" },
+        { "score": 6.8, "category": "Room Comfort" },
+        { "score": 8.5, "category": "Hotel Amenities & Atmosphere" },
+        { "score": 6.5, "category": "Food & Beverage" },
+        { "score": 7.5, "category": "Guest Experience & Service" },
+        { "score": 7.0, "category": "Value for Money" }
+      ]
+    },
+    {
+      "weekEnd": "2026-01-04",
+      "weekStart": "2025-12-29",
+      "category_scores": [
+        { "score": 9.0, "category": "Location & Neighbourhood" },
+        { "score": 8.0, "category": "Room Comfort" },
+        { "score": 8.8, "category": "Hotel Amenities & Atmosphere" },
+        { "score": 9.0, "category": "Food & Beverage" },
+        { "score": 8.3, "category": "Guest Experience & Service" },
+        { "score": 9.0, "category": "Value for Money" }
+      ]
+    }
+  ]
+}
