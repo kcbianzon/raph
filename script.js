@@ -2,17 +2,15 @@
    1. UTILITIES & CONFIG
    ========================================= */
 
-// Debug Logger
 function logError(msg, err) {
   console.error(msg, err);
   const box = document.getElementById("debug-log");
   if (box) {
     box.style.display = "block";
-    box.innerHTML = `<strong>⚠️ ERROR:</strong> ${msg}<br><br>${err ? err.message : ""}`;
+    box.innerHTML = `<strong> ERROR:</strong> ${msg}<br><br>${err ? err.message : ""}`;
   }
 }
 
-// Parse Date "2026-01" -> { year: "2026", month: "January" }
 function parseDate(label) {
   if (!label) return { year: "2025", month: "December" };
   const parts = label.split("-");
@@ -35,7 +33,6 @@ function parseDate(label) {
   return { year: year, month: months[monthIndex] || "January" };
 }
 
-// SVG Ring Generator (for Staff Page)
 function getRing(pct, colorClass) {
   const dash = (pct / 100) * 62.8;
   const empty = pct === 0;
@@ -45,7 +42,6 @@ function getRing(pct, colorClass) {
       ? "#2FAA68"
       : "#CE4049";
   const opacity = empty ? 0.3 : 1;
-
   return `
     <svg class="ring-svg" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10" class="ring-bg"></circle>
@@ -54,7 +50,6 @@ function getRing(pct, colorClass) {
     </svg>`;
 }
 
-// Category Meta Data (Corrected mapping)
 const META = {
   "Location & Neighbourhood": {
     code: "loc",
@@ -108,7 +103,7 @@ const META = {
 };
 
 /* =========================================
-   2. HARDCODED STAFF DATA (Page 3)
+   2. HARDCODED STAFF DATA
    ========================================= */
 const STAFF_DATA = [
   { name: "Staff", initial: "S", date: "2025-12-24", total: 8, pos: 8, neg: 0 },
@@ -222,26 +217,21 @@ const STAFF_DATA = [
    3. RENDER FUNCTIONS
    ========================================= */
 
-// Render Category Block (Pages 7 & 8)
 function renderCategory(catData, weeklyData, countData, containerId) {
-  // Safe default if category not found in META
   const meta = META[catData.category] || {
     code: "gen",
     colorClass: "c-blue",
     textClass: "t-blue",
     icon: "",
   };
-
   const scores = weeklyData[catData.category] || [null, null, null, null, null];
   const reviewCount =
     countData && countData[catData.category]
       ? countData[catData.category]
       : catData.count_total || 0;
 
-  // Build Table Rows
   let tableRows = `<tr><th>Performance</th><th>Week 1</th><th>Week 2</th><th>Week 3</th><th>Week 4</th><th>Week 5</th><th style="color:#5C86C8; letter-spacing:2px;">••••• Goal</th></tr><tr><td>Score</td>`;
   let points = [];
-
   scores.forEach((s, i) => {
     let cls = "";
     let val = "-";
@@ -250,7 +240,6 @@ function renderCategory(catData, weeklyData, countData, containerId) {
       if (s >= 8) cls = "score-green";
       else if (s >= 6) cls = "score-orange";
       else cls = "score-red";
-      // Sparkline coordinates (Box is 280x80)
       const x = 30 + i * 55;
       const y = 80 - s * 8;
       points.push(`${x},${y}`);
@@ -258,11 +247,8 @@ function renderCategory(catData, weeklyData, countData, containerId) {
     tableRows += `<td class="${cls}">${val}</td>`;
   });
   tableRows += `<td>8</td></tr>`;
-
-  // Sparkline SVG Path
   let d = points.length > 0 ? "M" + points.join(" L") : "";
 
-  // [FIX] Removed broken style tag on icon. Now uses CSS class directly.
   const html = `
     <div class="cat-block">
       <div class="cat-header">
@@ -274,42 +260,25 @@ function renderCategory(catData, weeklyData, countData, containerId) {
         <div class="cat-reviews"><span class="dot-reviews"></span> Reviews: ${reviewCount}</div>
       </div>
       <div class="cat-comment"><strong>Comment:</strong> ${catData.trend}</div>
-      
       <div class="viz-row">
-        <div class="chart-box">
-          <svg class="chart-svg">
-            <line x1="0" y1="40" x2="280" y2="40" class="chart-base" />
-            <path d="${d}" class="chart-line" />
-          </svg>
-        </div>
+        <div class="chart-box"><svg class="chart-svg"><line x1="0" y1="40" x2="280" y2="40" class="chart-base" /><path d="${d}" class="chart-line" /></svg></div>
         <table class="data-table">${tableRows}</table>
       </div>
-
       <div class="highlight-grid">
-        <div class="highlight-box hl-pos">
-          <div class="hl-icon"><i class="icon ic-check"></i></div>
-          ${catData.positive}
-        </div>
-        <div class="highlight-box hl-neg">
-          <div class="hl-icon"><i class="icon ic-alert"></i></div>
-          ${catData.negative}
-        </div>
+        <div class="highlight-box hl-pos"><div class="hl-icon"><i class="icon ic-check"></i></div>${catData.positive}</div>
+        <div class="highlight-box hl-neg"><div class="hl-icon"><i class="icon ic-alert"></i></div>${catData.negative}</div>
       </div>
-    </div>
-  `;
-
-  const container = document.getElementById(containerId);
-  if (container) container.innerHTML += html;
+    </div>`;
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML += html;
 }
 
-// Render Solution Item (Pages 9 & 10)
 function renderSolutionItem(item, containerId) {
   const meta = META[item.category] || {
     color: "c-blue",
     icon: "",
     title: item.category,
   };
-
   const html = `
     <div class="sol-item">
       <div class="sol-icon-circle ${meta.color}">
@@ -319,18 +288,16 @@ function renderSolutionItem(item, containerId) {
         <div class="sol-title">${meta.title}</div>
         <div class="sol-text">${item.action}</div>
       </div>
-    </div>
-  `;
-
-  const container = document.getElementById(containerId);
-  if (container) container.innerHTML += html;
+    </div>`;
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML += html;
 }
 
 /* =========================================
    4. MAIN INITIALIZATION
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // --- A. Populate Staff Table (Hardcoded) ---
+  // 1. Staff Table
   const staffBody = document.getElementById("staff-body");
   if (staffBody) {
     STAFF_DATA.forEach((row) => {
@@ -340,7 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
         row.pos > 0
           ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
           : "0%";
-
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td><div class="col-name"><div class="avatar">${row.initial}</div>${row.name}</div></td>
@@ -349,74 +315,43 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="center">${row.total}</td>
         <td class="right"><div class="ring-wrapper">${row.pos > 0 ? row.pos + "/" + row.total : "-"}${getRing(posRatio, "green")}</div></td>
         <td class="right"><div class="ring-wrapper">${row.neg > 0 ? row.neg + "/" + row.total : "-"}${getRing(negRatio, "red")}</div></td>
-        <td class="right">${ratioDisplay}</td>
-      `;
+        <td class="right">${ratioDisplay}</td>`;
       staffBody.appendChild(tr);
     });
   }
 
-  // --- B. Navigation Scroll Logic ---
-  const links = document.querySelectorAll(".nav-links a");
-
-  function setActive(hash) {
-    links.forEach((a) => {
-      a.style.color = a.getAttribute("href") === hash ? "#fff" : "#ccc";
-    });
-  }
-
-  links.forEach((a) => {
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      const href = a.getAttribute("href");
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-        setActive(href);
-      }
-    });
-  });
-
-  // --- C. Fetch & Populate Data from JSON ---
+  // 2. Fetch Data
   fetch("data.json")
     .then((res) => {
       if (!res.ok) throw new Error("Could not find data.json");
       return res.json();
     })
     .then((data) => {
-      window.REPORT_DATA = data; // Store for download function
+      window.REPORT_DATA = data;
 
-      // 1. Cover Page
-      let hotelName =
+      // Cover
+      let name =
         data.hotel_name ||
         (data.data_overview
           ? data.data_overview.hotel_name
           : "Excelsior Hotel Gallia");
-      document.getElementById("cover-hotel-name").innerHTML = hotelName.replace(
+      document.getElementById("cover-hotel-name").innerHTML = name.replace(
         /,/g,
         ",<br>",
       );
-
       const dateObj = parseDate(data.period_label);
       document.getElementById("cover-year").textContent = dateObj.year;
       document.getElementById("cover-month").textContent = dateObj.month;
-
-      // Update all header dates across pages
-      const fullDate = `${dateObj.month}, ${dateObj.year}`;
       document
         .querySelectorAll(".date-placeholder")
-        .forEach((el) => (el.textContent = fullDate));
+        .forEach(
+          (el) => (el.textContent = `${dateObj.month}, ${dateObj.year}`),
+        );
 
-      // 2. Dashboard Score (Page 2)
-      if (data.dashboard_overview && data.dashboard_overview.overall_score) {
-        document.getElementById("dashboard-score").textContent =
-          data.dashboard_overview.overall_score;
-      }
-
-      // 3. Overview (Page 5)
+      // Overview
       if (data.data_overview)
         document.getElementById("total-reviews").textContent =
           data.data_overview.total_reviews;
-
       if (data.sentiment_summary) {
         const s = data.sentiment_summary;
         const total = s.positive + s.neutral + s.negative;
@@ -438,7 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
           ).toFixed(1);
         }
       }
-
       if (data.insights) {
         document.getElementById("txt-highlight").textContent =
           data.insights.highlight;
@@ -446,10 +380,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("txt-trend").textContent =
           data.insights.trend_insights;
 
-        // 4. Top Lists (Page 6)
+        // Top Lists
         const posCont = document.getElementById("list-positives");
         const negCont = document.getElementById("list-negatives");
-
         if (data.insights.strengths) {
           data.insights.strengths.slice(0, 5).forEach((item, i) => {
             posCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
@@ -462,16 +395,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // 5. Category Reports (Pages 7 & 8)
+      // Categories
       const weeklyData = {};
       const countData = data.category_counts || {};
-
       if (data.insights && data.insights.category_summary) {
         data.insights.category_summary.forEach(
           (c) => (weeklyData[c.category] = [null, null, null, null, null]),
         );
       }
-
       const trends =
         data.weekly_category_trend ||
         (data.insights ? data.insights.weekly_category_trend : null);
@@ -483,7 +414,6 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       }
-
       const p7Cats = [
         "Location & Neighbourhood",
         "Cleanliness",
@@ -502,7 +432,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         if (cat) renderCategory(cat, weeklyData, countData, "cat-container-1");
       });
-
       p8Cats.forEach((name) => {
         const cat = data.insights.category_summary.find(
           (c) => c.category === name,
@@ -510,17 +439,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cat) renderCategory(cat, weeklyData, countData, "cat-container-2");
       });
 
-      // 6. Solutions (Pages 9 & 10)
+      // Solutions
       if (data.solution) {
-        if (data.solution.overall) {
+        if (data.solution.overall)
           document.getElementById("mgmt-focus-text").innerText =
             data.solution.overall;
-        }
         if (data.solution.category_solutions) {
           const list = data.solution.category_solutions.filter(
             (i) => i.action !== "-",
           );
-          // Split into two pages
           list
             .slice(0, 5)
             .forEach((item) => renderSolutionItem(item, "sol-list-1"));
@@ -530,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // 7. Contact (Page 11)
+      // Contact
       const contact = data.contact_info || {
         email: "info@wheretoknow.com",
         website: "www.wheretoknow.com",
@@ -538,7 +465,6 @@ document.addEventListener("DOMContentLoaded", () => {
         address_line_1: "Potsdamer Platz 10 Haus 2, 5. OG Quartier",
         address_line_2: "Potsdamer Platz 10785, Berlin Germany",
       };
-
       document.getElementById("c-email").textContent = contact.email;
       document.getElementById("c-email").href = "mailto:" + contact.email;
       document.getElementById("c-web").textContent = contact.website;
@@ -551,11 +477,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================
-   5. DOWNLOAD FUNCTIONS (FIXED)
+   5. DOWNLOAD FUNCTIONS (SAFE MODE)
    ========================================= */
 
 function downloadJSON() {
-  if (!window.REPORT_DATA) return alert("No data loaded to download.");
+  if (!window.REPORT_DATA) return alert("No data loaded");
   const blob = new Blob([JSON.stringify(window.REPORT_DATA, null, 2)], {
     type: "application/json",
   });
@@ -575,23 +501,36 @@ function downloadHTML() {
 }
 
 function downloadPDF() {
+  if (typeof html2pdf === "undefined") {
+    alert(
+      "Error: html2pdf library is missing. Ensure 'dist/html2pdf.bundle.min.js' is loaded.",
+    );
+    return;
+  }
+
+  const btn = document.querySelector(".btn-primary");
+  const originalText = btn.innerText;
+  btn.innerText = "Generating PDF... (Please Wait)";
+  btn.style.opacity = "0.7";
+  btn.disabled = true;
+
   const element = document.getElementById("report-content");
 
-  // [FIX] Use exact pixel format to match CSS dimensions (1240 x 1754)
-  // This prevents the "narrowing" effect.
+  // SAFE MODE: Auto-scaling (Zoom to fit)
   const opt = {
-    margin: 0,
+    margin: 0.5,
     filename: "hotel-report.pdf",
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale: 2,
       useCORS: true,
       scrollY: 0,
-      windowWidth: 1240,
+      // Removed windowWidth to let it auto-detect best fit
+      scrollX: 0,
     },
     jsPDF: {
-      unit: "px",
-      format: [1240, 1754],
+      unit: "in",
+      format: "a4",
       orientation: "portrait",
     },
     pagebreak: { mode: ["css", "legacy"] },
@@ -601,8 +540,16 @@ function downloadPDF() {
     .set(opt)
     .from(element)
     .save()
+    .then(() => {
+      btn.innerText = originalText;
+      btn.style.opacity = "1";
+      btn.disabled = false;
+    })
     .catch((err) => {
-      console.error("PDF Generation failed:", err);
-      alert("Could not generate PDF. Please ensure all assets are loaded.");
+      console.error(err);
+      alert("Error: " + err.message);
+      btn.innerText = originalText;
+      btn.style.opacity = "1";
+      btn.disabled = false;
     });
 }

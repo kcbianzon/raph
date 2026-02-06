@@ -10,7 +10,6 @@
 body {
   font-family: 'Inter', sans-serif;
   background: #555;
-  /* Dark background to see the white pages clearly */
   color: #333;
   -webkit-font-smoothing: antialiased;
 }
@@ -20,7 +19,7 @@ html {
 }
 
 /* =========================================
-   2. CONTROL BAR (Navigation)
+   2. CONTROL BAR
    ========================================= */
 .control-bar {
   position: fixed;
@@ -66,17 +65,6 @@ html {
   border-color: #4F81BD;
 }
 
-/* Hide control bar when printing */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    background: #fff;
-  }
-}
-
 /* =========================================
    3. PAGE CONTAINER
    ========================================= */
@@ -86,9 +74,10 @@ html {
 }
 
 .page {
-  background: #fff;
+  background: #ffffff;
+  /* Must be explicit hex */
   width: 1240px;
-  height: 1754px;
+  min-height: 1754px;
   /* Fixed A4 pixel height */
   padding: 60px 64px;
   position: relative;
@@ -96,12 +85,54 @@ html {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   page-break-after: always;
-  /* Critical for PDF separation */
   break-after: page;
 }
 
 /* =========================================
-   4. SHARED ELEMENTS
+   4. PDF / PRINT STYLES (SAFE MODE)
+   ========================================= */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset body styling for print */
+  body,
+  html {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+  }
+
+  #report-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    /* Allow auto-scale */
+  }
+
+  .page {
+    /* Let the PDF engine handle dimensions */
+    width: 100% !important;
+    height: auto !important;
+
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    page-break-after: always !important;
+    break-after: page !important;
+
+    background-color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* =========================================
+   5. SHARED ELEMENTS
    ========================================= */
 header {
   display: flex;
@@ -143,6 +174,7 @@ header {
   display: inline-block;
   padding-bottom: 6px;
   margin-bottom: 40px;
+  min-width: 200px;
 }
 
 .sect-icon {
@@ -177,7 +209,7 @@ footer {
 }
 
 /* =========================================
-   5. ICONS (Fixed Data URIs)
+   6. ICONS
    ========================================= */
 .icon {
   width: 20px;
@@ -189,7 +221,7 @@ footer {
   background-size: contain;
 }
 
-/* Replaced with generic shapes if SVGs fail, but these encoded SVGs should work */
+/* SVG DATA URIS */
 .ic-loc {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235C86C8'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
 }
@@ -250,40 +282,102 @@ footer {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CE4049'%3E%3Cpath d='M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/%3E%3C/svg%3E");
 }
 
-/* Icon Circle Colors (for Solutions page) */
-.icon-blue {
-  color: #5C86C8;
-  border-color: #5C86C8;
-}
-
-.icon-teal {
-  color: #3AA49D;
-  border-color: #3AA49D;
-}
-
-.icon-purple {
-  color: #9B7FD6;
-  border-color: #9B7FD6;
-}
-
-.icon-pink {
-  color: #E06C9F;
-  border-color: #E06C9F;
-}
-
-.icon-orange {
-  color: #E68A5C;
-  border-color: #E68A5C;
-}
-
-.icon-gold {
-  color: #D4AF37;
-  border-color: #D4AF37;
-}
-
 /* =========================================
-   6. DASHBOARD SPECIFIC (Page 2)
+   7. PAGE SPECIFICS
    ========================================= */
+.page-cover {
+  padding: 112px 120px;
+}
+
+.cover-logos {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.cover-logo,
+.cover-hotel-logo {
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+}
+
+.cover-logo-divider {
+  width: 1px;
+  height: 100px;
+  background-color: #E6E6E6;
+}
+
+.cover-line {
+  width: 100%;
+  max-width: 1000px;
+  height: 1px;
+  background-color: #E6E6E6;
+  margin-bottom: 80px;
+}
+
+.cover-title {
+  font-weight: 600;
+  font-size: 64px;
+  line-height: 1.2;
+  color: #232323;
+  max-width: 900px;
+  margin: 0 0 60px 0;
+}
+
+.cover-report {
+  font-weight: 600;
+  font-size: 32px;
+  color: #232323;
+  margin: 0 0 20px 0;
+}
+
+.cover-bar {
+  width: 100px;
+  height: 6px;
+  background: linear-gradient(90deg, #6689C4, #744C89);
+  border-radius: 3px;
+  margin-bottom: 60px;
+}
+
+.cover-date-wrap {
+  margin-top: 20px;
+}
+
+.cover-year {
+  font-weight: 400;
+  font-size: 80px;
+  color: #232323;
+  line-height: 1;
+  margin: 0 0 10px 0;
+}
+
+.cover-month {
+  font-weight: 600;
+  font-size: 64px;
+  color: #5C86C8;
+  line-height: 1;
+  margin: 0;
+}
+
+.cover-hero {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 900px;
+  height: 900px;
+  background: url('assets/hero-image.png') bottom right/contain no-repeat;
+  opacity: 0.3;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
 .widgets {
   display: flex;
   justify-content: space-between;
@@ -364,7 +458,6 @@ h3 {
   margin-bottom: 24px;
 }
 
-/* Donut Chart */
 .donut-container {
   position: relative;
   width: 280px;
@@ -449,7 +542,6 @@ h3 {
   background: #CE4049;
 }
 
-/* Categories List */
 .cat-list {
   display: flex;
   flex-direction: column;
@@ -486,7 +578,6 @@ h3 {
   color: #4F81BD;
 }
 
-/* KPI Grid */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -561,9 +652,119 @@ h3 {
   left: -15px;
 }
 
-/* =========================================
-   7. COMPETITORS (Page 4)
-   ========================================= */
+.customize-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #333;
+  font-weight: 600;
+}
+
+.plus-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #444;
+}
+
+.staff-table th {
+  text-align: left;
+  font-weight: 500;
+  color: #888;
+  padding: 16px 12px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.staff-table th.center {
+  text-align: center;
+}
+
+.staff-table th.right {
+  text-align: right;
+}
+
+.staff-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.col-name {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: #E6F0FF;
+  color: #4F81BD;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.col-arrow {
+  color: #ccc;
+  font-size: 12px;
+  text-align: right;
+  padding-right: 20px;
+}
+
+.ring-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ring-svg {
+  width: 24px;
+  height: 24px;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 3;
+}
+
+.ring-val {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.stroke-green {
+  stroke: #2FAA68;
+}
+
+.stroke-red {
+  stroke: #CE4049;
+}
+
 .top-grid {
   display: flex;
   justify-content: space-between;
@@ -813,100 +1014,6 @@ h3 {
   background: #8E7CC3;
 }
 
-/* =========================================
-   8. STAFF, CATEGORIES & DETAILS
-   ========================================= */
-.staff-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  color: #444;
-}
-
-.staff-table th {
-  text-align: left;
-  font-weight: 500;
-  color: #888;
-  padding: 16px 12px;
-  border-bottom: 1px solid #eee;
-}
-
-.staff-table th.center {
-  text-align: center;
-}
-
-.staff-table th.right {
-  text-align: right;
-}
-
-.staff-table td {
-  padding: 16px 12px;
-  border-bottom: 1px solid #eee;
-  vertical-align: middle;
-}
-
-.col-name {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  background: #E6F0FF;
-  color: #4F81BD;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.col-arrow {
-  color: #ccc;
-  font-size: 12px;
-  text-align: right;
-  padding-right: 20px;
-}
-
-.ring-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.ring-svg {
-  width: 24px;
-  height: 24px;
-  transform: rotate(-90deg);
-}
-
-.ring-bg {
-  fill: none;
-  stroke: #eee;
-  stroke-width: 3;
-}
-
-.ring-val {
-  fill: none;
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.stroke-green {
-  stroke: #2FAA68;
-}
-
-.stroke-red {
-  stroke: #CE4049;
-}
-
-/* Monthly Details & Category Blocks */
 .sub-head {
   font-size: 18px;
   font-weight: 600;
@@ -965,6 +1072,11 @@ h3 {
   gap: 10px;
   font-weight: 600;
   font-size: 16px;
+}
+
+.sent-ratio {
+  font-size: 13px;
+  color: #888;
 }
 
 .text-block {
@@ -1242,102 +1354,6 @@ h3 {
   height: 16px;
 }
 
-/* =========================================
-   9. COVER, SOLUTIONS, CONTACT
-   ========================================= */
-.page-cover {
-  padding: 112px 120px;
-}
-
-.cover-logos {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  margin-bottom: 60px;
-}
-
-.cover-logo,
-.cover-hotel-logo {
-  height: 120px;
-  width: auto;
-  object-fit: contain;
-}
-
-.cover-logo-divider {
-  width: 1px;
-  height: 100px;
-  background-color: #E6E6E6;
-}
-
-.cover-line {
-  width: 100%;
-  max-width: 1000px;
-  height: 1px;
-  background-color: #E6E6E6;
-  margin-bottom: 80px;
-}
-
-.cover-title {
-  font-weight: 600;
-  font-size: 64px;
-  line-height: 1.2;
-  color: #232323;
-  max-width: 900px;
-  margin: 0 0 60px 0;
-}
-
-.cover-report {
-  font-weight: 600;
-  font-size: 32px;
-  color: #232323;
-  margin: 0 0 20px 0;
-}
-
-.cover-bar {
-  width: 100px;
-  height: 6px;
-  background: linear-gradient(90deg, #6689C4, #744C89);
-  border-radius: 3px;
-  margin-bottom: 60px;
-}
-
-.cover-date-wrap {
-  margin-top: 20px;
-}
-
-.cover-year {
-  font-weight: 400;
-  font-size: 80px;
-  color: #232323;
-  line-height: 1;
-  margin: 0 0 10px 0;
-}
-
-.cover-month {
-  font-weight: 600;
-  font-size: 64px;
-  color: #5C86C8;
-  line-height: 1;
-  margin: 0;
-}
-
-.cover-hero {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 900px;
-  height: 900px;
-  background: url('assets/hero-image.png') bottom right/contain no-repeat;
-  opacity: 0.3;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.content-wrapper {
-  position: relative;
-  z-index: 1;
-}
-
 .mgmt-box {
   background: #FFFAF7;
   border-radius: 12px;
@@ -1396,6 +1412,36 @@ h3 {
   font-size: 14px;
   line-height: 1.5;
   color: #555;
+}
+
+.icon-blue {
+  color: #5C86C8;
+  border-color: #5C86C8;
+}
+
+.icon-teal {
+  color: #3AA49D;
+  border-color: #3AA49D;
+}
+
+.icon-purple {
+  color: #9B7FD6;
+  border-color: #9B7FD6;
+}
+
+.icon-pink {
+  color: #E06C9F;
+  border-color: #E06C9F;
+}
+
+.icon-orange {
+  color: #E68A5C;
+  border-color: #E68A5C;
+}
+
+.icon-gold {
+  color: #D4AF37;
+  border-color: #D4AF37;
 }
 
 .page-contact {
