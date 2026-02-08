@@ -7,7 +7,7 @@ function logError(msg, err) {
   const box = document.getElementById("debug-log");
   if (box) {
     box.style.display = "block";
-    box.innerHTML = `<strong> ERROR:</strong> ${msg}<br><br>${err ? err.message : ""}`;
+    box.innerHTML = `<strong>⚠️ ERROR:</strong> ${msg}<br><br>${err ? err.message : ""}`;
   }
 }
 
@@ -297,7 +297,6 @@ function renderSolutionItem(item, containerId) {
    4. MAIN INITIALIZATION
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Staff Table
   const staffBody = document.getElementById("staff-body");
   if (staffBody) {
     STAFF_DATA.forEach((row) => {
@@ -320,7 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 2. Fetch Data
   fetch("data.json")
     .then((res) => {
       if (!res.ok) throw new Error("Could not find data.json");
@@ -328,8 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .then((data) => {
       window.REPORT_DATA = data;
-
-      // Cover
       let name =
         data.hotel_name ||
         (data.data_overview
@@ -347,8 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach(
           (el) => (el.textContent = `${dateObj.month}, ${dateObj.year}`),
         );
-
-      // Overview
       if (data.data_overview)
         document.getElementById("total-reviews").textContent =
           data.data_overview.total_reviews;
@@ -379,8 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("txt-issue").textContent = data.insights.issue;
         document.getElementById("txt-trend").textContent =
           data.insights.trend_insights;
-
-        // Top Lists
         const posCont = document.getElementById("list-positives");
         const negCont = document.getElementById("list-negatives");
         if (data.insights.strengths) {
@@ -414,29 +406,34 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       }
+
       const p7Cats = [
         "Location & Neighbourhood",
         "Cleanliness",
         "Room Comfort",
         "Hotel Amenities & Atmosphere",
       ];
+
+      p7Cats.forEach((name) => {
+        const cat = data.insights.category_summary.find(
+          (c) => c.category === name,
+        );
+        if (cat)
+          renderCategoryPage7(cat, weeklyData, countData, "cat-container-1");
+      });
+
       const p8Cats = [
         "Food & Beverage",
         "Guest Experience & Service",
         "Value for Money",
       ];
 
-      p7Cats.forEach((name) => {
-        const cat = data.insights.category_summary.find(
-          (c) => c.category === name,
-        );
-        if (cat) renderCategory(cat, weeklyData, countData, "cat-container-1");
-      });
       p8Cats.forEach((name) => {
         const cat = data.insights.category_summary.find(
           (c) => c.category === name,
         );
-        if (cat) renderCategory(cat, weeklyData, countData, "cat-container-2");
+        if (cat)
+          renderCategoryPage7(cat, weeklyData, countData, "cat-container-2");
       });
 
       // Solutions
@@ -503,7 +500,7 @@ function downloadHTML() {
 function downloadPDF() {
   if (typeof html2pdf === "undefined") {
     alert(
-      "Error: html2pdf library is missing. Ensure 'dist/html2pdf.bundle.min.js' is loaded.",
+      "Error: html2pdf library is missing. Ensure 'html2pdf.bundle.min.js' is in the folder.",
     );
     return;
   }
@@ -514,42 +511,183 @@ function downloadPDF() {
   btn.style.opacity = "0.7";
   btn.disabled = true;
 
-  const element = document.getElementById("report-content");
+  // 1. Activate PDF Mode (Removes gaps/shadows)
+  document.body.classList.add("pdf-mode");
 
-  // SAFE MODE: Auto-scaling (Zoom to fit)
+  const element = document.getElementById("report-content");
   const opt = {
-    margin: 0.5,
+    margin: 0,
     filename: "hotel-report.pdf",
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale: 2,
       useCORS: true,
       scrollY: 0,
-      // Removed windowWidth to let it auto-detect best fit
-      scrollX: 0,
+      windowWidth: 1240,
+      width: 1240,
     },
     jsPDF: {
-      unit: "in",
+      unit: "pt",
       format: "a4",
       orientation: "portrait",
     },
     pagebreak: { mode: ["css", "legacy"] },
   };
-
   html2pdf()
     .set(opt)
     .from(element)
     .save()
     .then(() => {
+      document.body.classList.remove("pdf-mode");
       btn.innerText = originalText;
       btn.style.opacity = "1";
       btn.disabled = false;
     })
     .catch((err) => {
+      document.body.classList.remove("pdf-mode");
       console.error(err);
       alert("Error: " + err.message);
       btn.innerText = originalText;
       btn.style.opacity = "1";
       btn.disabled = false;
     });
+}
+function getSmoothPath(points) {
+  if (points.length < 2) return "";
+  const line = (pA, pB) => {
+    const lX = pB[0] - pA[0],
+      lY = pB[1] - pA[1];
+    return {
+      length: Math.sqrt(Math.pow(lX, 2) + Math.pow(lY, 2)),
+      angle: Math.atan2(lY, lX),
+    };
+  };
+  const controlPoint = (cur, prev, next, rev) => {
+    const p = prev || cur,
+      n = next || cur;
+    const o = line(p, n);
+    const angle = o.angle + (rev ? Math.PI : 0),
+      length = o.length * 0.2;
+    const x = cur[0] + Math.cos(angle) * length,
+      y = cur[1] + Math.sin(angle) * length;
+    return [x, y];
+  };
+  const command = (p, i, a) => {
+    const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], p);
+    const [cpeX, cpeY] = controlPoint(p, a[i - 1], a[i + 1], true);
+    return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${p[0]},${p[1]}`;
+  };
+  return points.reduce(
+    (acc, p, i, a) =>
+      i === 0 ? `M ${p[0]},${p[1]}` : `${acc} ${command(p, i, a)}`,
+    "",
+  );
+}
+function renderCategoryPage7(catData, weeklyData, countData, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const meta = META[catData.category] || { icon: "ic-loc" };
+  const scores = weeklyData[catData.category] || [null, null, null, null, null];
+  const reviewCount =
+    countData && countData[catData.category]
+      ? countData[catData.category]
+      : catData.count_total || 0;
+
+  let dotClass = "dot-hollow";
+  if (reviewCount > 15) dotClass = "dot-green";
+  else if (reviewCount > 5) dotClass = "dot-gold";
+  let tableRows = `
+    <tr>
+      <th style="text-align:left; color:#999; font-weight:400; font-size:12px; padding:8px;">Performance</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 1</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 2</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 3</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 4</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 5</th>
+      <th style="color:#4472C4; letter-spacing:1px; text-transform:uppercase; font-size:10px; font-weight:700;">...... Goal</th>
+    </tr>
+    <tr>
+      <td style="color:#666; font-size:12px; padding:8px;">Score</td>`;
+
+  let points = [];
+  scores.forEach((s, i) => {
+    let cls = "";
+    let val = "-";
+    if (s !== null) {
+      val = s;
+      if (s >= 8) cls = "txt-green";
+      else if (s >= 6) cls = "txt-orange";
+      else cls = "txt-red";
+
+      const x = 30 + i * 50;
+      const y = (10 - s) * 15;
+      points.push([x, y]);
+    }
+    tableRows += `<td class="${cls}" style="text-align:center;">${val}</td>`;
+  });
+  tableRows += `<td class="txt-black" style="text-align:center;">8</td></tr>`;
+  let pathLine = getSmoothPath(points);
+  let pathFill = "";
+  if (points.length > 0) {
+    const last = points[points.length - 1];
+    const first = points[0];
+    pathFill = `${pathLine} L ${last[0]},80 L ${first[0]},80 Z`;
+  }
+
+  const iconPos =
+    "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRl_9WLZWz8V74FWrJkf6BmE7-mvIdfnRe83Nzg8QXHvRiPMR9y";
+  const iconNeg =
+    "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcT-FaAWkfFJ7f1vh26wXTHzlttDvPblpLkHGuVbIRkOioC3NvXp";
+
+  const html = `
+    <div class="cat-block" style="margin-bottom: 50px;">
+      <div class="cat-header-row">
+        <div class="cat-gold-line"></div>
+        <div class="cat-title-text">
+           <i class="icon ${meta.icon}"></i> ${catData.category}
+        </div>
+        <div class="cat-separator"></div>
+        <div class="cat-reviews-text">
+           <span class="${dotClass}"></span> Reviews: ${reviewCount}
+        </div>
+      </div>
+
+      <div style="font-size: 13px; color: #555; margin-bottom: 20px; line-height:1.5;">
+        <span style="color:#666;">Comment:</span> ${catData.trend}
+      </div>
+
+      <div class="viz-row" style="display: flex; gap: 20px; align-items: flex-start;">
+        <div class="chart-container-smooth">
+          <svg viewBox="0 0 280 80" style="width:100%; height:100%; overflow:visible;">
+             <defs>
+               <linearGradient id="gradBlue${containerId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                 <stop offset="0%" style="stop-color:#4472C4;stop-opacity:0.2" />
+                 <stop offset="100%" style="stop-color:#4472C4;stop-opacity:0" />
+               </linearGradient>
+             </defs>
+             <line x1="10" y1="30" x2="270" y2="30" stroke="#4472C4" stroke-width="1" stroke-dasharray="2,2" opacity="0.6" />
+             <path d="${pathFill}" fill="url(#gradBlue${containerId})" stroke="none" />
+             <path d="${pathLine}" fill="none" stroke="#4472C4" stroke-width="2" />
+          </svg>
+        </div>
+
+        <table class="data-table" style="flex: 1; border: 1px solid #eee; margin-left:10px; border-collapse:collapse;">
+           ${tableRows}
+        </table>
+      </div>
+      
+      <div style="display:flex; gap:20px; margin-top:15px;">
+         <div style="flex:1; background:rgba(47, 170, 104, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
+            <img src="${iconPos}" class="icon-img-sm">
+            <div style="line-height:1.4;">${catData.positive}</div>
+         </div>
+         <div style="flex:1; background:rgba(206, 64, 73, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
+            <img src="${iconNeg}" class="icon-img-sm">
+            <div style="line-height:1.4;">${catData.negative}</div>
+         </div>
+      </div>
+    </div>`;
+
+  if (container) container.innerHTML += html;
 }
