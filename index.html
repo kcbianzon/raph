@@ -12,26 +12,39 @@
     />
     <link rel="stylesheet" href="styles.css" />
 
-    <script src="html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
   <body>
     <div class="control-bar no-print">
-      <div class="nav-links">
-        <a href="#p1">Cover</a>
-        <a href="#p2">Dashboard</a>
-        <a href="#p3">Staff</a>
-        <a href="#p4">Competitors</a>
-        <a href="#p5">Overview</a>
-        <a href="#p7">Categories</a>
-        <a href="#p9">Solutions</a>
-        <a href="#p11">Contact</a>
-      </div>
-      <div class="actions">
-        <button onclick="downloadJSON()">Json</button>
-        <button onclick="downloadHTML()">Html</button>
-        <button onclick="downloadPDF()" class="btn-primary">
-          Download PDF
-        </button>
+      <div class="control-content">
+        <div class="nav-links">
+          <a href="#p1">Cover</a>
+          <a href="#p2">Dashboard</a>
+          <a href="#p3">Staff</a>
+          <a href="#p4">Competitors</a>
+          <a href="#p5">Overview</a>
+          <a href="#p7">Categories</a>
+          <a href="#p9">Solutions</a>
+          <a href="#p11">Contact</a>
+        </div>
+        <div class="actions">
+          <input
+            type="file"
+            id="upload-json"
+            style="display: none"
+            accept=".json"
+          />
+          <button onclick="document.getElementById('upload-json').click()">
+            Upload JSON
+          </button>
+          <button onclick="downloadJSON()">Json</button>
+          <button onclick="downloadExcel()">Excel</button>
+          <button onclick="downloadHTML()">Html</button>
+          <button onclick="downloadPDF()" class="btn-primary">
+            Download PDF
+          </button>
+        </div>
       </div>
     </div>
 
@@ -64,36 +77,32 @@
       </section>
 
       <section id="p2" class="page">
-        <div class="header-top-bar"></div>
+        <div class="header-top-bar" style="background: #004b8d"></div>
         <header class="dashboard-header">
           <div class="header-left">
             <img src="assets/hotel.png" alt="Hotel Logo" class="header-logo" />
           </div>
           <div class="header-center">
-            <div class="header-date">December, 2025</div>
+            <div class="header-date date-placeholder">December, 2025</div>
           </div>
           <div class="header-right">
             <div class="header-tag">AI powered Human Insights</div>
           </div>
         </header>
 
-        <div class="sect-title">
+        <div class="sect-title" style="color: #004b8d">
           <img src="assets/icon.png" class="sect-icon-img" alt="icon" />
-          <span class="title-text">Dashboard</span>
+          <span class="title-text" style="border-bottom-color: #004b8d"
+            >Dashboard</span
+          >
         </div>
 
         <div class="widgets">
           <div class="widget-box">
-            <img
-              src="https://cdn.bookingexperts.com/uploads/app_store_application/logo/22/Booking.com.png"
-              class="widget-img"
-            />
+            <img src="assets/booking.png" class="widget-img" />
           </div>
           <div class="widget-box">
-            <img
-              src="https://img.utdstc.com/icon/b35/3bd/b353bd08d3a383b749aad247eb277bc9d69575950a91f62cb7e2bbc16ef2a0dd:200"
-              class="widget-img"
-            />
+            <img src="assets/trip.png" class="widget-img" />
           </div>
           <div class="widget-box">
             <img src="assets/expedia.png" class="widget-img" />
@@ -105,10 +114,7 @@
             <img src="assets/owl.png" class="widget-img" />
           </div>
           <div class="widget-box">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmNrI16j9L9wKUDqHQZWFasTsckKQ5TotSMpBP1SiO-9OhCDhH"
-              class="widget-img widget-img-wide"
-            />
+            <img src="assets/agoda.png" class="widget-img widget-img-wide" />
           </div>
         </div>
 
@@ -282,7 +288,7 @@
               >
               <span
                 class="kpi-lbl"
-                style="top: 1pxx; left: -15px; font-size: 12px"
+                style="top: 1px; left: -15px; font-size: 12px"
                 >10%</span
               >
               <span
@@ -394,7 +400,7 @@
             <div class="kpi-chart-wrap">
               <span
                 class="kpi-lbl"
-                style="top: -10px; left: 5 px; font-size: 12px"
+                style="top: -10px; left: 5px; font-size: 12px"
                 >20%</span
               >
               <span
@@ -2481,7 +2487,7 @@
             <tr>
               <th>Category</th>
               <th>Booking.com</th>
-              <th>Ctrip</th>
+              <th>trip</th>
               <th>Expedia</th>
               <th>Google</th>
               <th>Tripadvisor</th>

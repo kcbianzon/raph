@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #555;
+  background: #ffffff;
   color: #333;
   -webkit-font-smoothing: antialiased;
 }
@@ -19,7 +19,7 @@ html {
 }
 
 /* =========================================
-   2. CONTROL BAR
+   2. CONTROL BAR (UPDATED: White Theme & Centered)
    ========================================= */
 .control-bar {
   position: fixed;
@@ -27,42 +27,68 @@ html {
   left: 0;
   right: 0;
   height: 60px;
-  background: #222;
-  color: #fff;
+  background: #ffffff;
+  /* White background */
   z-index: 9999;
+  display: flex;
+  justify-content: center;
+  /* Centers the content wrapper */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  /* Soft shadow */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.control-content {
+  width: 1240px;
+  /* Matches your page width */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 0 20px;
+  /* Inner padding for safety */
 }
 
 .nav-links a {
-  color: #ccc;
+  color: #555;
+  /* Dark text */
   margin-right: 20px;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  transition: color 0.2s;
 }
 
 .nav-links a:hover {
-  color: #fff;
+  color: #004B8D;
+  /* Primary Blue on hover */
 }
 
 .actions button {
-  background: #444;
-  border: 1px solid #555;
-  color: #fff;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #333;
   padding: 8px 16px;
   cursor: pointer;
   border-radius: 4px;
   margin-left: 10px;
   font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.actions button:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
 }
 
 .actions button.btn-primary {
-  background: #4F81BD;
-  border-color: #4F81BD;
+  background: #004B8D;
+  color: #fff;
+  border: 1px solid #004B8D;
+}
+
+.actions button.btn-primary:hover {
+  background: #003a6e;
 }
 
 /* =========================================
@@ -1884,29 +1910,38 @@ h3 {
 }
 
 /* =========================================
-   PDF GENERATION MODE
+   PDF GENERATION MODE (Manual Slide Logic)
    ========================================= */
-
 body.pdf-mode {
   background: #ffffff !important;
+  /* Hide scrollbars during capture */
+  overflow: hidden !important;
 }
 
+/* Ensure the wrapper is centered and white */
 .pdf-mode #report-content {
-  margin: 0 auto !important;
+  background: #fff !important;
+  margin: 0 !important;
+  padding: 0 !important;
   width: 1240px !important;
 }
 
 .pdf-mode .page {
+  /* Reset spacing so capture is clean */
   margin: 0 !important;
-  box-shadow: none !important;
   border: none !important;
-  page-break-after: always !important;
-  page-break-inside: avoid !important;
-  min-height: 1754px !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 
+  /* Ensure strict width for the canvas capture */
+  width: 1240px !important;
+  min-height: 1754px !important;
+  /* Visual consistency only */
+
+  background-color: #ffffff !important;
 }
 
-
+/* Hide UI elements */
 .pdf-mode .control-bar,
 .pdf-mode #debug-log {
   display: none !important;

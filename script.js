@@ -293,265 +293,6 @@ function renderSolutionItem(item, containerId) {
   if (el) el.innerHTML += html;
 }
 
-/* =========================================
-   4. MAIN INITIALIZATION
-   ========================================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const staffBody = document.getElementById("staff-body");
-  if (staffBody) {
-    STAFF_DATA.forEach((row) => {
-      const posRatio = (row.pos / row.total) * 100;
-      const negRatio = (row.neg / row.total) * 100;
-      const ratioDisplay =
-        row.pos > 0
-          ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
-          : "0%";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><div class="col-name"><div class="avatar">${row.initial}</div>${row.name}</div></td>
-        <td class="col-arrow">></td>
-        <td>${row.date}</td>
-        <td class="center">${row.total}</td>
-        <td class="right"><div class="ring-wrapper">${row.pos > 0 ? row.pos + "/" + row.total : "-"}${getRing(posRatio, "green")}</div></td>
-        <td class="right"><div class="ring-wrapper">${row.neg > 0 ? row.neg + "/" + row.total : "-"}${getRing(negRatio, "red")}</div></td>
-        <td class="right">${ratioDisplay}</td>`;
-      staffBody.appendChild(tr);
-    });
-  }
-
-  fetch("data.json")
-    .then((res) => {
-      if (!res.ok) throw new Error("Could not find data.json");
-      return res.json();
-    })
-    .then((data) => {
-      window.REPORT_DATA = data;
-      let name =
-        data.hotel_name ||
-        (data.data_overview
-          ? data.data_overview.hotel_name
-          : "Excelsior Hotel Gallia");
-      document.getElementById("cover-hotel-name").innerHTML = name.replace(
-        /,/g,
-        ",<br>",
-      );
-      const dateObj = parseDate(data.period_label);
-      document.getElementById("cover-year").textContent = dateObj.year;
-      document.getElementById("cover-month").textContent = dateObj.month;
-      document
-        .querySelectorAll(".date-placeholder")
-        .forEach(
-          (el) => (el.textContent = `${dateObj.month}, ${dateObj.year}`),
-        );
-      if (data.data_overview)
-        document.getElementById("total-reviews").textContent =
-          data.data_overview.total_reviews;
-      if (data.sentiment_summary) {
-        const s = data.sentiment_summary;
-        const total = s.positive + s.neutral + s.negative;
-        document.getElementById("sent-pos").textContent = s.positive;
-        document.getElementById("sent-neu").textContent = s.neutral;
-        document.getElementById("sent-neg").textContent = s.negative;
-        if (total > 0) {
-          document.getElementById("ratio-pos").textContent = (
-            (s.positive / total) *
-            100
-          ).toFixed(1);
-          document.getElementById("ratio-neu").textContent = (
-            (s.neutral / total) *
-            100
-          ).toFixed(1);
-          document.getElementById("ratio-neg").textContent = (
-            (s.negative / total) *
-            100
-          ).toFixed(1);
-        }
-      }
-      if (data.insights) {
-        document.getElementById("txt-highlight").textContent =
-          data.insights.highlight;
-        document.getElementById("txt-issue").textContent = data.insights.issue;
-        document.getElementById("txt-trend").textContent =
-          data.insights.trend_insights;
-        const posCont = document.getElementById("list-positives");
-        const negCont = document.getElementById("list-negatives");
-        if (data.insights.strengths) {
-          data.insights.strengths.slice(0, 5).forEach((item, i) => {
-            posCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
-          });
-        }
-        if (data.insights.improvements) {
-          data.insights.improvements.slice(0, 5).forEach((item, i) => {
-            negCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
-          });
-        }
-      }
-
-      // Categories
-      const weeklyData = {};
-      const countData = data.category_counts || {};
-      if (data.insights && data.insights.category_summary) {
-        data.insights.category_summary.forEach(
-          (c) => (weeklyData[c.category] = [null, null, null, null, null]),
-        );
-      }
-      const trends =
-        data.weekly_category_trend ||
-        (data.insights ? data.insights.weekly_category_trend : null);
-      if (trends) {
-        trends.forEach((week, wIdx) => {
-          week.category_scores.forEach((cs) => {
-            if (weeklyData[cs.category] && wIdx < 5)
-              weeklyData[cs.category][wIdx] = cs.score;
-          });
-        });
-      }
-
-      const p7Cats = [
-        "Location & Neighbourhood",
-        "Cleanliness",
-        "Room Comfort",
-        "Hotel Amenities & Atmosphere",
-      ];
-
-      p7Cats.forEach((name) => {
-        const cat = data.insights.category_summary.find(
-          (c) => c.category === name,
-        );
-        if (cat)
-          renderCategoryPage7(cat, weeklyData, countData, "cat-container-1");
-      });
-
-      const p8Cats = [
-        "Food & Beverage",
-        "Guest Experience & Service",
-        "Value for Money",
-      ];
-
-      p8Cats.forEach((name) => {
-        const cat = data.insights.category_summary.find(
-          (c) => c.category === name,
-        );
-        if (cat)
-          renderCategoryPage7(cat, weeklyData, countData, "cat-container-2");
-      });
-
-      // Solutions
-      if (data.solution) {
-        if (data.solution.overall)
-          document.getElementById("mgmt-focus-text").innerText =
-            data.solution.overall;
-        if (data.solution.category_solutions) {
-          const list = data.solution.category_solutions.filter(
-            (i) => i.action !== "-",
-          );
-          list
-            .slice(0, 5)
-            .forEach((item) => renderSolutionItem(item, "sol-list-1"));
-          list
-            .slice(5)
-            .forEach((item) => renderSolutionItem(item, "sol-list-2"));
-        }
-      }
-
-      // Contact
-      const contact = data.contact_info || {
-        email: "info@wheretoknow.com",
-        website: "www.wheretoknow.com",
-        company_name: "Where to know Insights GmbH",
-        address_line_1: "Potsdamer Platz 10 Haus 2, 5. OG Quartier",
-        address_line_2: "Potsdamer Platz 10785, Berlin Germany",
-      };
-      document.getElementById("c-email").textContent = contact.email;
-      document.getElementById("c-email").href = "mailto:" + contact.email;
-      document.getElementById("c-web").textContent = contact.website;
-      document.getElementById("c-web").href = "https://" + contact.website;
-      document.getElementById("c-name").textContent = contact.company_name;
-      document.getElementById("c-addr1").textContent = contact.address_line_1;
-      document.getElementById("c-addr2").textContent = contact.address_line_2;
-    })
-    .catch((err) => logError("Data Load Failed", err));
-});
-
-/* =========================================
-   5. DOWNLOAD FUNCTIONS (SAFE MODE)
-   ========================================= */
-
-function downloadJSON() {
-  if (!window.REPORT_DATA) return alert("No data loaded");
-  const blob = new Blob([JSON.stringify(window.REPORT_DATA, null, 2)], {
-    type: "application/json",
-  });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "data.json";
-  link.click();
-}
-
-function downloadHTML() {
-  const html = document.documentElement.outerHTML;
-  const blob = new Blob([html], { type: "text/html" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "hotel-report.html";
-  link.click();
-}
-
-function downloadPDF() {
-  if (typeof html2pdf === "undefined") {
-    alert(
-      "Error: html2pdf library is missing. Ensure 'html2pdf.bundle.min.js' is in the folder.",
-    );
-    return;
-  }
-
-  const btn = document.querySelector(".btn-primary");
-  const originalText = btn.innerText;
-  btn.innerText = "Generating PDF... (Please Wait)";
-  btn.style.opacity = "0.7";
-  btn.disabled = true;
-
-  // 1. Activate PDF Mode (Removes gaps/shadows)
-  document.body.classList.add("pdf-mode");
-
-  const element = document.getElementById("report-content");
-  const opt = {
-    margin: 0,
-    filename: "hotel-report.pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      scrollY: 0,
-      windowWidth: 1240,
-      width: 1240,
-    },
-    jsPDF: {
-      unit: "pt",
-      format: "a4",
-      orientation: "portrait",
-    },
-    pagebreak: { mode: ["css", "legacy"] },
-  };
-  html2pdf()
-    .set(opt)
-    .from(element)
-    .save()
-    .then(() => {
-      document.body.classList.remove("pdf-mode");
-      btn.innerText = originalText;
-      btn.style.opacity = "1";
-      btn.disabled = false;
-    })
-    .catch((err) => {
-      document.body.classList.remove("pdf-mode");
-      console.error(err);
-      alert("Error: " + err.message);
-      btn.innerText = originalText;
-      btn.style.opacity = "1";
-      btn.disabled = false;
-    });
-}
 function getSmoothPath(points) {
   if (points.length < 2) return "";
   const line = (pA, pB) => {
@@ -583,6 +324,7 @@ function getSmoothPath(points) {
     "",
   );
 }
+
 function renderCategoryPage7(catData, weeklyData, countData, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -690,4 +432,353 @@ function renderCategoryPage7(catData, weeklyData, countData, containerId) {
     </div>`;
 
   if (container) container.innerHTML += html;
+}
+
+/* =========================================
+   4. RENDER ALL (DYNAMIC RE-RENDER)
+   ========================================= */
+
+function renderReport(data) {
+  window.REPORT_DATA = data; // Store data globally
+
+  // 1. Clear existing dynamic containers to avoid duplication
+  const idsToClear = [
+    "cat-container-1",
+    "cat-container-2",
+    "sol-list-1",
+    "sol-list-2",
+    "list-positives",
+    "list-negatives",
+  ];
+  idsToClear.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = "";
+  });
+
+  // 2. Cover Page
+  let name =
+    data.hotel_name ||
+    (data.data_overview
+      ? data.data_overview.hotel_name
+      : "Excelsior Hotel Gallia");
+  document.getElementById("cover-hotel-name").innerHTML = name.replace(
+    /,/g,
+    ",<br>",
+  );
+  const dateObj = parseDate(data.period_label);
+  document.getElementById("cover-year").textContent = dateObj.year;
+  document.getElementById("cover-month").textContent = dateObj.month;
+  document
+    .querySelectorAll(".date-placeholder")
+    .forEach((el) => (el.textContent = `${dateObj.month}, ${dateObj.year}`));
+
+  // 3. Overview (Page 5)
+  if (data.data_overview)
+    document.getElementById("total-reviews").textContent =
+      data.data_overview.total_reviews;
+
+  if (data.sentiment_summary) {
+    const s = data.sentiment_summary;
+    const total = s.positive + s.neutral + s.negative;
+    document.getElementById("sent-pos").textContent = s.positive;
+    document.getElementById("sent-neu").textContent = s.neutral;
+    document.getElementById("sent-neg").textContent = s.negative;
+    if (total > 0) {
+      document.getElementById("ratio-pos").textContent = (
+        (s.positive / total) *
+        100
+      ).toFixed(1);
+      document.getElementById("ratio-neu").textContent = (
+        (s.neutral / total) *
+        100
+      ).toFixed(1);
+      document.getElementById("ratio-neg").textContent = (
+        (s.negative / total) *
+        100
+      ).toFixed(1);
+    }
+  }
+
+  // 4. Insights (Highlight, Issue, Trend, Top Lists)
+  if (data.insights) {
+    document.getElementById("txt-highlight").textContent =
+      data.insights.highlight;
+    document.getElementById("txt-issue").textContent = data.insights.issue;
+    document.getElementById("txt-trend").textContent =
+      data.insights.trend_insights;
+    const posCont = document.getElementById("list-positives");
+    const negCont = document.getElementById("list-negatives");
+    if (data.insights.strengths) {
+      data.insights.strengths.slice(0, 5).forEach((item, i) => {
+        posCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
+      });
+    }
+    if (data.insights.improvements) {
+      data.insights.improvements.slice(0, 5).forEach((item, i) => {
+        negCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
+      });
+    }
+  }
+
+  // 5. Categories (Page 7 & 8)
+  const weeklyData = {};
+  const countData = data.category_counts || {};
+  if (data.insights && data.insights.category_summary) {
+    data.insights.category_summary.forEach(
+      (c) => (weeklyData[c.category] = [null, null, null, null, null]),
+    );
+  }
+  const trends =
+    data.weekly_category_trend ||
+    (data.insights ? data.insights.weekly_category_trend : null);
+  if (trends) {
+    trends.forEach((week, wIdx) => {
+      week.category_scores.forEach((cs) => {
+        if (weeklyData[cs.category] && wIdx < 5)
+          weeklyData[cs.category][wIdx] = cs.score;
+      });
+    });
+  }
+
+  const p7Cats = [
+    "Location & Neighbourhood",
+    "Cleanliness",
+    "Room Comfort",
+    "Hotel Amenities & Atmosphere",
+  ];
+  p7Cats.forEach((name) => {
+    const cat = data.insights.category_summary.find((c) => c.category === name);
+    if (cat) renderCategoryPage7(cat, weeklyData, countData, "cat-container-1");
+  });
+
+  const p8Cats = [
+    "Food & Beverage",
+    "Guest Experience & Service",
+    "Value for Money",
+  ];
+  p8Cats.forEach((name) => {
+    const cat = data.insights.category_summary.find((c) => c.category === name);
+    if (cat) renderCategoryPage7(cat, weeklyData, countData, "cat-container-2");
+  });
+
+  // 6. Solutions (Page 9 & 10)
+  if (data.solution) {
+    if (data.solution.overall)
+      document.getElementById("mgmt-focus-text").innerText =
+        data.solution.overall;
+    if (data.solution.category_solutions) {
+      const list = data.solution.category_solutions.filter(
+        (i) => i.action !== "-",
+      );
+      list
+        .slice(0, 5)
+        .forEach((item) => renderSolutionItem(item, "sol-list-1"));
+      list.slice(5).forEach((item) => renderSolutionItem(item, "sol-list-2"));
+    }
+  }
+
+  // 7. Contact Info
+  const contact = data.contact_info || {
+    email: "info@wheretoknow.com",
+    website: "www.wheretoknow.com",
+    company_name: "Where to know Insights GmbH",
+    address_line_1: "Potsdamer Platz 10 Haus 2, 5. OG Quartier",
+    address_line_2: "Potsdamer Platz 10785, Berlin Germany",
+  };
+  document.getElementById("c-email").textContent = contact.email;
+  document.getElementById("c-email").href = "mailto:" + contact.email;
+  document.getElementById("c-web").textContent = contact.website;
+  document.getElementById("c-web").href = "https://" + contact.website;
+  document.getElementById("c-name").textContent = contact.company_name;
+  document.getElementById("c-addr1").textContent = contact.address_line_1;
+  document.getElementById("c-addr2").textContent = contact.address_line_2;
+}
+
+/* =========================================
+   5. MAIN INITIALIZATION & UPLOAD
+   ========================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Staff Table (Static Data)
+  const staffBody = document.getElementById("staff-body");
+  if (staffBody) {
+    STAFF_DATA.forEach((row) => {
+      const posRatio = (row.pos / row.total) * 100;
+      const negRatio = (row.neg / row.total) * 100;
+      const ratioDisplay =
+        row.pos > 0
+          ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
+          : "0%";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><div class="col-name"><div class="avatar">${row.initial}</div>${row.name}</div></td>
+        <td class="col-arrow">></td>
+        <td>${row.date}</td>
+        <td class="center">${row.total}</td>
+        <td class="right"><div class="ring-wrapper">${row.pos > 0 ? row.pos + "/" + row.total : "-"}${getRing(posRatio, "green")}</div></td>
+        <td class="right"><div class="ring-wrapper">${row.neg > 0 ? row.neg + "/" + row.total : "-"}${getRing(negRatio, "red")}</div></td>
+        <td class="right">${ratioDisplay}</td>`;
+      staffBody.appendChild(tr);
+    });
+  }
+
+  // 2. Fetch Default Data
+  fetch("data.json")
+    .then((res) => {
+      if (!res.ok) throw new Error("Could not find data.json");
+      return res.json();
+    })
+    .then((data) => {
+      renderReport(data);
+    })
+    .catch((err) => logError("Data Load Failed", err));
+
+  // 3. Setup JSON Upload Listener
+  const uploadInput = document.getElementById("upload-json");
+  if (uploadInput) {
+    uploadInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const json = JSON.parse(e.target.result);
+          // Re-render report with new data
+          renderReport(json);
+          alert("Data updated successfully!");
+        } catch (err) {
+          alert("Invalid JSON file");
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+});
+
+/* =========================================
+   6. DOWNLOAD FUNCTIONS
+   ========================================= */
+
+function downloadJSON() {
+  if (!window.REPORT_DATA) return alert("No data loaded");
+  const blob = new Blob([JSON.stringify(window.REPORT_DATA, null, 2)], {
+    type: "application/json",
+  });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "data.json";
+  link.click();
+}
+
+function downloadExcel() {
+  if (!window.REPORT_DATA) return alert("No data loaded");
+
+  const data = window.REPORT_DATA;
+  const wb = XLSX.utils.book_new();
+
+  // 1. Overview Sheet
+  const overviewData = [
+    ["Hotel Name", data.hotel_name || ""],
+    ["Period", data.period_label || ""],
+    ["Total Reviews", data.data_overview?.total_reviews || 0],
+    [],
+    ["Sentiment", "Count"],
+    ["Positive", data.sentiment_summary?.positive || 0],
+    ["Neutral", data.sentiment_summary?.neutral || 0],
+    ["Negative", data.sentiment_summary?.negative || 0],
+  ];
+  const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
+  XLSX.utils.book_append_sheet(wb, wsOverview, "Overview");
+
+  // 2. Categories Sheet
+  if (data.insights && data.insights.category_summary) {
+    const catRows = [
+      ["Category", "Score", "Positive Highlights", "Negative Highlights"],
+    ];
+    data.insights.category_summary.forEach((c) => {
+      catRows.push([c.category, c.score, c.positive, c.negative]);
+    });
+    const wsCats = XLSX.utils.aoa_to_sheet(catRows);
+    XLSX.utils.book_append_sheet(wb, wsCats, "Categories");
+  }
+
+  // 3. Solutions Sheet
+  if (data.solution && data.solution.category_solutions) {
+    const solRows = [["Category", "Suggested Action"]];
+    data.solution.category_solutions.forEach((s) => {
+      solRows.push([s.category, s.action]);
+    });
+    const wsSols = XLSX.utils.aoa_to_sheet(solRows);
+    XLSX.utils.book_append_sheet(wb, wsSols, "Solutions");
+  }
+
+  XLSX.writeFile(wb, "hotel-report-data.xlsx");
+}
+
+function downloadHTML() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: "text/html" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "hotel-report.html";
+  link.click();
+}
+
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const btn = document.querySelector(".btn-primary");
+  const originalText = btn.innerText;
+
+  btn.innerText = "Generating PDF... (Please Wait)";
+  btn.style.opacity = "0.7";
+  btn.disabled = true;
+
+  // 1. Activate PDF Styling
+  document.body.classList.add("pdf-mode");
+
+  try {
+    const doc = new jsPDF({
+      orientation: "p",
+      unit: "pt",
+      format: "a4",
+    });
+
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = doc.internal.pageSize.getHeight();
+
+    // 2. Select all pages
+    const pages = document.querySelectorAll(".page");
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+
+      // 3. Capture each page individually
+      // scale: 2 ensures high quality
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        windowWidth: 1240, // Force capture at desktop width
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.98);
+
+      // 4. Add to PDF
+      if (i > 0) doc.addPage(); // Add new page for everyone except the first
+
+      // Stretch image to fill the PDF page exactly
+      doc.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+    }
+
+    doc.save("hotel-report.pdf");
+  } catch (err) {
+    console.error(err);
+    alert("Error generating PDF: " + err.message);
+  } finally {
+    // 5. Cleanup
+    document.body.classList.remove("pdf-mode");
+    btn.innerText = originalText;
+    btn.style.opacity = "1";
+    btn.disabled = false;
+  }
 }
