@@ -2059,32 +2059,3 @@ body.pdf-mode {
   font-size: 12px;
   color: #888;
 }
-
-/* =========================================
-   CSS ICON REPLACEMENT
-   ========================================= */
-.opt-icon-css {
-  width: 40px;
-  height: 40px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  border: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s;
-}
-
-.up-opt:hover .opt-icon-css {
-  background: #fff;
-  border-color: #004B8D;
-}
-
-.css-dot {
-  width: 14px;
-  height: 14px;
-  background-color: #004B8D;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(0, 75, 141, 0.15);
-}
