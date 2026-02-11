@@ -1977,7 +1977,6 @@ body.pdf-mode {
   margin: 0;
   font-size: 16px;
   border: none;
-  /* Reset dash h3 border */
   padding: 0;
   color: #333;
 }
@@ -2028,8 +2027,22 @@ body.pdf-mode {
   transform: translateX(5px);
 }
 
-.opt-icon {
-  font-size: 24px;
+/* =========================================
+   MODAL ICON
+   ========================================= */
+.opt-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  padding: 6px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.up-opt:hover .opt-icon-img {
+  background: #fff;
+  border-color: #004B8D;
 }
 
 .opt-info {
@@ -2045,4 +2058,63 @@ body.pdf-mode {
 .opt-info span {
   font-size: 12px;
   color: #888;
+}
+
+/* =========================================
+   CSS ICON REPLACEMENT
+   ========================================= */
+.opt-icon-css {
+  width: 40px;
+  height: 40px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.up-opt:hover .opt-icon-css {
+  background: #fff;
+  border-color: #004B8D;
+}
+
+.css-dot {
+  width: 14px;
+  height: 14px;
+  background-color: #004B8D;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(0, 75, 141, 0.15);
+}
+
+/* =========================================
+   CSS CHART ICON (Competitors)
+   ========================================= */
+.css-chart-icon {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  width: 18px;
+  height: 18px;
+}
+
+.css-chart-icon span {
+  background-color: #004B8D;
+  width: 4px;
+  border-radius: 1px;
+}
+
+/* Staggered heights for the bars */
+.css-chart-icon span:nth-child(1) {
+  height: 40%;
+}
+
+.css-chart-icon span:nth-child(2) {
+  height: 100%;
+}
+
+.css-chart-icon span:nth-child(3) {
+  height: 60%;
 }

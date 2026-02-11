@@ -473,7 +473,6 @@ function renderReport(data) {
    4. MAIN INITIALIZATION & DASHBOARD
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initial Load
   Promise.all([
     fetch("data.json").then((r) => r.json()),
     fetch("dashboard.json").then((r) => r.json()),
@@ -483,14 +482,11 @@ document.addEventListener("DOMContentLoaded", () => {
       window.REPORT_DATA = mainData;
       window.DASH_DATA = dashData;
       window.COMP_DATA = compData;
-
-      renderReport(mainData); // Pages 1, 5-10
-      renderDashboardPage(dashData); // Pages 2-3
-      if (compData) renderCompetitorsPage(compData); // Page 4
+      renderReport(mainData);
+      renderDashboardPage(dashData);
+      if (compData) renderCompetitorsPage(compData);
     })
     .catch((err) => logError("Data Load Failed", err));
-
-  // 2. Helper for File Uploads
   const setupUpload = (id, callback) => {
     const input = document.getElementById(id);
     if (!input) return;
@@ -501,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
       reader.onload = function (e) {
         try {
           const json = JSON.parse(e.target.result);
-          callback(json); // Run the specific render function
+          callback(json);
           closeUploadModal();
           alert("Data updated successfully!");
         } catch (err) {
@@ -510,12 +506,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
       reader.readAsText(file);
-      // Reset input so same file can be selected again
       e.target.value = "";
     });
   };
-
-  // 3. Attach Listeners to the 3 Inputs
   setupUpload("file-dashboard", (json) => renderDashboardPage(json));
   setupUpload("file-competitors", (json) =>
     renderCompetitorsPage({
@@ -523,8 +516,6 @@ document.addEventListener("DOMContentLoaded", () => {
       competitors: json.competitors || json,
     }),
   );
-  // Note: For competitors, we assume the JSON structure matches. If uploading full structure, pass directly.
-  // Ideally, user uploads the full 'competitors.json' structure.
   setupUpload("file-competitors", (json) => renderCompetitorsPage(json));
 
   setupUpload("file-main", (json) => renderReport(json));
@@ -662,6 +653,7 @@ function renderCompetitorsPage(data) {
           </div>`;
       listContainer.innerHTML += html;
     });
+    renderComboChart(subject, comps);
   }
   const tableHead = document.getElementById("comp-table-head");
   const tableBody = document.getElementById("comp-table-body");
@@ -738,8 +730,6 @@ function openUploadModal() {
 function closeUploadModal() {
   document.getElementById("uploadModal").style.display = "none";
 }
-
-// Close if clicked outside
 window.onclick = function (event) {
   const modal = document.getElementById("uploadModal");
   if (event.target === modal) {
@@ -748,11 +738,9 @@ window.onclick = function (event) {
 };
 function renderDashboardPage(dashData) {
   if (!dashData) return;
-  window.DASH_DATA = dashData; // Update Global
+  window.DASH_DATA = dashData;
 
   const cats = dashData.categories;
-
-  // 1. Overview Donut
   if (cats) {
     const dashScore = document.getElementById("dash-score");
     if (dashScore) dashScore.textContent = cats.score;
@@ -770,7 +758,6 @@ function renderDashboardPage(dashData) {
     if (elNeg) elNeg.textContent = neg + "%";
   }
 
-  // 2. KPI Cards
   const kpiContainer = document.getElementById("kpi-container");
   if (kpiContainer && cats.serviceCategories) {
     kpiContainer.innerHTML = "";
@@ -779,7 +766,6 @@ function renderDashboardPage(dashData) {
         renderKPICard(cat, "kpi-container");
       }
     });
-    // Add Customize Card
     kpiContainer.innerHTML += `
         <div class="kpi-card customize-card">
             <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
@@ -790,8 +776,6 @@ function renderDashboardPage(dashData) {
             </div>
         </div>`;
   }
-
-  // 3. Target vs Performance Table
   const targetBody = document.getElementById("target-table-body");
   if (targetBody && cats.serviceCategories) {
     targetBody.innerHTML = "";
@@ -815,7 +799,6 @@ function renderDashboardPage(dashData) {
     });
   }
 
-  // 4. Staff Table
   const staffBody = document.getElementById("staff-body");
   if (staffBody && dashData.staffs) {
     staffBody.innerHTML = "";
@@ -843,4 +826,86 @@ function renderDashboardPage(dashData) {
       staffBody.appendChild(tr);
     });
   }
+}
+function renderComboChart(subject, competitors) {
+  const container = document.getElementById("combo-chart");
+  if (!container) return;
+  const allHotels = [subject, ...competitors];
+  const maxReviews = Math.max(
+    ...allHotels.map((h) => h.wtkSummary.review_count || 0),
+  );
+  const yMax = Math.ceil(maxReviews / 10) * 10 || 10;
+  let yAxisLeft = `<div style="grid-row: 1 / 2; grid-column: 1 / 2; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-right: 10px;">
+    <span style="font-weight: 600; color: #555">No. of reviews</span>`;
+
+  for (let i = 5; i >= 0; i--) {
+    yAxisLeft += `<span>${Math.round((yMax / 5) * i)}</span>`;
+  }
+  yAxisLeft += `</div>`;
+  const barCount = allHotels.length;
+  let barsHtml = "";
+  let polylinePoints = "";
+
+  allHotels.forEach((h, index) => {
+    const reviews = h.wtkSummary.review_count || 0;
+    const score = h.wtkSummary.overall_score_avg || 0;
+    const barHeightPx = (reviews / yMax) * 200;
+    const bg = index === 0 ? "#1F3B32" : "#3b556e";
+
+    barsHtml += `
+      <div style="width: 18px; height: 250px; display: flex; flex-direction: column-reverse; padding-bottom: 30px;">
+        <div style="height: ${barHeightPx}px; background: ${bg}; border-radius: 2px 2px 0 0;" title="${reviews} Reviews"></div>
+      </div>`;
+    const x = ((index + 0.5) / barCount) * 500;
+    const y = 250 - (score / 10) * 230;
+
+    polylinePoints += `${x},${y} `;
+  });
+
+  const chartArea = `
+    <div style="grid-row: 1 / 2; grid-column: 2 / 3; position: relative; height: 250px;">
+      <div style="position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-top: 20px;">
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #ccc"></div>
+      </div>
+
+      <div style="position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
+        ${barsHtml}
+      </div>
+
+      <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; overflow: visible;" viewBox="0 0 500 250" preserveAspectRatio="none">
+        <polyline points="${polylinePoints}" fill="none" stroke="#4472C4" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+        ${polylinePoints
+          .trim()
+          .split(" ")
+          .map(
+            (p) =>
+              `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="4" fill="#4472C4" />`,
+          )
+          .join("")}
+      </svg>
+    </div>`;
+  const yAxisRight = `
+    <div style="grid-row: 1 / 2; grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-left: 10px;">
+      <span style="font-weight: 600; color: #555">Score</span>
+      <span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
+    </div>`;
+  let xAxis = `<div style="grid-row: 2 / 3; grid-column: 2 / 3; display: flex; justify-content: space-around; font-size: 10px; color: #555; margin-top: 5px; text-align: center;">`;
+  allHotels.forEach((h) => {
+    let shortName = h.basicInfo.hotelName.substring(0, 10) + "..";
+    xAxis += `<span style="width: 18%;">${shortName}</span>`;
+  });
+  xAxis += `</div>`;
+  container.innerHTML = yAxisLeft + chartArea + yAxisRight + xAxis;
+  container.innerHTML += `
+    <div style="grid-row: 3 / 4; grid-column: 1 / 4; display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 11px; color: #666;">
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#1F3B32"></div> Review Vol (Subject)</div>
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#3b556e"></div> Review Vol (Comp)</div>
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:16px; height:2px; background:#4472C4"></div> Score Trend</div>
+    </div>
+  `;
 }

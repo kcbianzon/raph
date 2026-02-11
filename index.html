@@ -690,6 +690,7 @@
             <div style="flex: 1">
               <div
                 class="combo-chart-container"
+                id="combo-chart"
                 style="
                   display: grid;
                   grid-template-columns: 60px 1fr 40px;
@@ -1903,7 +1904,10 @@
           
           <div class="upload-options">
             <div class="up-opt" onclick="document.getElementById('file-dashboard').click()">
-              <img src="assets/icon.png" class="opt-icon-img" alt="Dashboard" />
+              <div class="opt-icon-css">
+                <div class="css-dot"></div>
+              </div>
+              
               <div class="opt-info">
                 <strong>Dashboard & Staff</strong>
                 <span>Pages 2 & 3</span>

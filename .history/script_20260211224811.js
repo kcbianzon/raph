@@ -49,8 +49,6 @@ function getRing(pct, colorClass) {
         stroke="${stroke}" stroke-dasharray="${dash} 62.8" style="opacity:${opacity}"></circle>
     </svg>`;
 }
-
-// FIX: Added 'img' for icons and 'short' for KPI labels
 const META = {
   "Location & Neighbourhood": {
     code: "loc",
@@ -122,44 +120,27 @@ const META = {
    ========================================= */
 
 function renderKPICard(cat, containerId) {
-  // 1. Calculate Percentages
   const total = cat.total || 1;
   const posPct = Math.round((cat.positive / total) * 100);
   const negPct = Math.round((cat.negative / total) * 100);
   const neuPct = Math.round((cat.neutral / total) * 100);
-
-  // 2. Metadata Lookup
   const metaKey =
     Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
   const meta = META[metaKey] || {
     img: "check.png",
     short: cat.title.split(" ")[0],
   };
-
-  // 3. Dash Arrays for SVG
   const greenDash = `${posPct}, 100`;
   const yellowDash = `${neuPct}, 100`;
   const yellowOffset = -posPct;
   const redDash = `${negPct}, 100`;
   const redOffset = -(posPct + neuPct);
-
-  // 4. Helper to Calculate Label Position (Math Magic)
-  // offsetPct: where the arc starts (e.g., Green starts at 0, Yellow at posPct)
-  // valPct: how big the arc is
   const getPos = (offsetPct, valPct) => {
-    if (valPct <= 0) return null; // Don't show label if 0%
-
-    // Find middle of the arc
+    if (valPct <= 0) return null;
     const midPct = offsetPct + valPct / 2;
-
-    // Convert percent to degrees (3.6 deg per 1%). Subtract 90 to start at 12 o'clock.
     const angleDeg = midPct * 3.6 - 90;
     const angleRad = angleDeg * (Math.PI / 180);
-
-    // Distance from center (50% is edge of box, we go 68% to be outside ring)
     const radius = 68;
-
-    // Calculate Top/Left percentages
     const left = 50 + radius * Math.cos(angleRad);
     const top = 50 + radius * Math.sin(angleRad);
 
@@ -167,11 +148,8 @@ function renderKPICard(cat, containerId) {
   };
 
   const posStyle = getPos(0, posPct);
-  const neuStyle = getPos(posPct, neuPct); // Neutral follows Positive
-  const negStyle = getPos(posPct + neuPct, negPct); // Negative follows Neutral
-
-  // 5. Generate HTML
-  // Note: We use transform: translate(-50%, -50%) to center the text exactly on the point
+  const neuStyle = getPos(posPct, neuPct);
+  const negStyle = getPos(posPct + neuPct, negPct);
   const html = `
     <div class="kpi-card">
       <div class="kpi-head">
@@ -500,100 +478,47 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("dashboard.json").then((r) => r.json()),
     fetch("competitors.json").then((r) => r.json()),
   ])
-    .then(([mainData, dashData]) => {
+    .then(([mainData, dashData, compData]) => {
       window.REPORT_DATA = mainData;
       window.DASH_DATA = dashData;
       window.COMP_DATA = compData;
       renderReport(mainData);
-      const cats = dashData.categories;
-      if (cats) {
-        const dashScore = document.getElementById("dash-score");
-        if (dashScore) dashScore.textContent = cats.score;
-
-        const total = cats.total || 1;
-        const pos = Math.round((cats.positive / total) * 100);
-        const neu = Math.round((cats.neutral / total) * 100);
-        const neg = Math.round((cats.negative / total) * 100);
-
-        const elPos = document.getElementById("dash-pos-lbl");
-        if (elPos) elPos.textContent = pos + "%";
-        const elNeu = document.getElementById("dash-neu-lbl");
-        if (elNeu) elNeu.textContent = neu + "%";
-        const elNeg = document.getElementById("dash-neg-lbl");
-        if (elNeg) elNeg.textContent = neg + "%";
-      }
-      const kpiContainer = document.getElementById("kpi-container");
-      if (kpiContainer && cats.serviceCategories) {
-        kpiContainer.innerHTML = "";
-        cats.serviceCategories.forEach((cat) => {
-          if (cat.title !== "Brand Consistency & Expression") {
-            renderKPICard(cat, "kpi-container");
-          }
-        });
-        kpiContainer.innerHTML += `
-        <div class="kpi-card customize-card">
-            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
-              <span style="font-weight: 800; color: #555">Customize KPI</span>
-            </div>
-            <div class="customize-body">
-              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
-            </div>
-        </div>`;
-      }
-      const targetBody = document.getElementById("target-table-body");
-      if (targetBody && cats.serviceCategories) {
-        targetBody.innerHTML = "";
-        cats.serviceCategories.forEach((cat) => {
-          if (cat.title === "Brand Consistency & Expression") return;
-          const diff = (cat.score - 8).toFixed(1);
-          const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
-          const diffSign = diff >= 0 ? "+" : "";
-
-          const metaKey =
-            Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
-          const meta = META[metaKey] || { img: "check.png", short: cat.title };
-
-          targetBody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f5f5f5;">
-                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
-                <td class="val-center">${cat.score}</td>
-                <td class="val-center">8</td>
-                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
-            </tr>`;
-        });
-      }
-      if (compData) {
-        renderCompetitorsPage(compData);
-      }
-      const staffBody = document.getElementById("staff-body");
-      if (staffBody && dashData.staffs) {
-        staffBody.innerHTML = "";
-        dashData.staffs.forEach((row) => {
-          const total = row.totalMentions || 0;
-          const pos = row.positive || 0;
-          const neg = row.negative || 0;
-          const posRatio = total > 0 ? (pos / total) * 100 : 0;
-          const negRatio = total > 0 ? (neg / total) * 100 : 0;
-          const ratioDisplay =
-            pos > 0
-              ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
-              : "0%";
-          const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
-          <td class="col-arrow">></td>
-          <td>${row.lastTimeMention || "-"}</td>
-          <td class="center">${total}</td>
-          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
-          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
-          <td class="right">${ratioDisplay}</td>`;
-          staffBody.appendChild(tr);
-        });
-      }
+      renderDashboardPage(dashData);
+      if (compData) renderCompetitorsPage(compData);
     })
     .catch((err) => logError("Data Load Failed", err));
+  const setupUpload = (id, callback) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const json = JSON.parse(e.target.result);
+          callback(json);
+          closeUploadModal();
+          alert("Data updated successfully!");
+        } catch (err) {
+          alert("Invalid JSON file");
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+  };
+  setupUpload("file-dashboard", (json) => renderDashboardPage(json));
+  setupUpload("file-competitors", (json) =>
+    renderCompetitorsPage({
+      subject: window.COMP_DATA.subject,
+      competitors: json.competitors || json,
+    }),
+  );
+  setupUpload("file-competitors", (json) => renderCompetitorsPage(json));
+
+  setupUpload("file-main", (json) => renderReport(json));
 });
 
 /* =========================================
@@ -681,14 +606,9 @@ async function downloadPDF() {
 function renderCompetitorsPage(data) {
   const subject = data.subject;
   const comps = data.competitors;
-
-  // 1. Render Subject Score (Left Circle)
   const subjScore = subject.wtkSummary.overall_score_avg || 0;
   document.getElementById("comp-subject-score").textContent =
     subjScore.toFixed(1);
-
-  // 2. Render Gauge (Relative Performance)
-  // Calculate average of competitors
   let compSum = 0;
   let compCount = 0;
   comps.forEach((c) => {
@@ -698,19 +618,9 @@ function renderCompetitorsPage(data) {
     }
   });
   const compAvg = compCount > 0 ? compSum / compCount : 1;
-
-  // Ratio: Subject / Average
-  // Example: 9.0 / 8.0 = 1.125
   const ratio = compAvg > 0 ? subjScore / compAvg : 1;
   const ratioDisplay = ratio.toFixed(2);
-
-  // Needle Rotation Logic:
-  // 1.0 = 0deg (Center)
-  // 0.5 = -90deg (Left)
-  // 1.5 = +90deg (Right)
-  // Formula: (Ratio - 1) * 180
   let rotation = (ratio - 1) * 180;
-  // Clamp rotation between -90 and 90
   if (rotation < -90) rotation = -90;
   if (rotation > 90) rotation = 90;
 
@@ -723,18 +633,13 @@ function renderCompetitorsPage(data) {
     ratioText.textContent = ratioDisplay;
     ratioText.style.color = ratio >= 1 ? "#2FAA68" : "#CE4049";
   }
-
-  // 3. Render Competitor List (Bar Charts)
   const listContainer = document.getElementById("comp-list-container");
   if (listContainer) {
     listContainer.innerHTML = "";
-    // Sort competitors by score descending? Or keep order? Let's keep JSON order.
     comps.forEach((c, index) => {
       const score = c.wtkSummary.overall_score_avg || 0;
-      // Simple color cycle for bars
       const colors = ["#3b556e", "#917b9f", "#9fb0c8", "#c5a665", "#7a62ae"];
       const barColor = colors[index % colors.length];
-      // Calculate width (Max score is usually 10)
       const widthPct = (score / 10) * 100;
 
       const html = `
@@ -748,36 +653,25 @@ function renderCompetitorsPage(data) {
           </div>`;
       listContainer.innerHTML += html;
     });
+    renderComboChart(subject, comps);
   }
-
-  // 4. Render Comparison Table
   const tableHead = document.getElementById("comp-table-head");
   const tableBody = document.getElementById("comp-table-body");
 
   if (tableHead && tableBody) {
-    // A. Build Header
     let headHtml = `<th style="text-align: left; padding: 15px 10px; font-weight: 700; color: #333;">Category</th>`;
-
-    // Subject Header (Highlighted)
     headHtml += `
       <th style="text-align: center; padding: 15px 10px; font-weight: 600; background-color: #f8fbff; border-bottom: 2px solid #3aa49d;">
         ${subject.basicInfo.hotelName.substring(0, 15)}...
       </th>`;
-
-    // Competitor Headers
     comps.forEach((c) => {
       headHtml += `<th style="text-align: center; padding: 15px 10px; font-weight: 600;">${c.basicInfo.hotelName.substring(0, 15)}...</th>`;
     });
-
-    // Average & Diff Headers
     headHtml += `
       <th style="text-align: center; padding: 15px 10px; font-weight: 700; color: #333;">Average</th>
       <th style="text-align: right; padding: 15px 20px 15px 10px; font-weight: 700; color: #333;">Diff</th>`;
 
     tableHead.innerHTML = headHtml;
-
-    // B. Build Body Rows
-    // Categories to track (Standardized keys from your JSON)
     const catKeys = [
       "Location & Neighbourhood",
       "Cleanliness",
@@ -795,11 +689,7 @@ function renderCompetitorsPage(data) {
 
       let rowHtml = `<tr style="border-bottom: 1px solid #f5f5f5">`;
       rowHtml += `<td style="padding: 12px 10px; font-weight: 500">${cat}</td>`;
-
-      // Subject Value
       rowHtml += `<td style="text-align: center; padding: 12px 10px; background-color: #f8fbff; color: ${subjVal >= 8 ? "#2faa68" : subjVal >= 6 ? "#efb82c" : "#ce4049"}; font-weight: 600;">${subjVal.toFixed(1)}</td>`;
-
-      // Competitor Values
       let rowSum = 0;
       let rowCount = 0;
 
@@ -812,12 +702,8 @@ function renderCompetitorsPage(data) {
         const color = val >= 8 ? "#2faa68" : val >= 6 ? "#efb82c" : "#ce4049";
         rowHtml += `<td style="text-align: center; padding: 12px 10px; color: ${color}">${val > 0 ? val.toFixed(1) : "-"}</td>`;
       });
-
-      // Average
       const rowAvg = rowCount > 0 ? rowSum / rowCount : 0;
       rowHtml += `<td style="text-align: center; padding: 12px 10px; font-weight: 700; color: #333;">${rowAvg > 0 ? rowAvg.toFixed(1) : "-"}</td>`;
-
-      // Diff (Subject - Average)
       let diff = 0;
       let diffHtml = "-";
       if (subjVal > 0 && rowAvg > 0) {
@@ -833,4 +719,193 @@ function renderCompetitorsPage(data) {
       tableBody.innerHTML += rowHtml;
     });
   }
+}
+/* =========================================
+   MODAL LOGIC
+   ========================================= */
+function openUploadModal() {
+  document.getElementById("uploadModal").style.display = "flex";
+}
+
+function closeUploadModal() {
+  document.getElementById("uploadModal").style.display = "none";
+}
+window.onclick = function (event) {
+  const modal = document.getElementById("uploadModal");
+  if (event.target === modal) {
+    closeUploadModal();
+  }
+};
+function renderDashboardPage(dashData) {
+  if (!dashData) return;
+  window.DASH_DATA = dashData;
+
+  const cats = dashData.categories;
+  if (cats) {
+    const dashScore = document.getElementById("dash-score");
+    if (dashScore) dashScore.textContent = cats.score;
+
+    const total = cats.total || 1;
+    const pos = Math.round((cats.positive / total) * 100);
+    const neu = Math.round((cats.neutral / total) * 100);
+    const neg = Math.round((cats.negative / total) * 100);
+
+    const elPos = document.getElementById("dash-pos-lbl");
+    if (elPos) elPos.textContent = pos + "%";
+    const elNeu = document.getElementById("dash-neu-lbl");
+    if (elNeu) elNeu.textContent = neu + "%";
+    const elNeg = document.getElementById("dash-neg-lbl");
+    if (elNeg) elNeg.textContent = neg + "%";
+  }
+
+  const kpiContainer = document.getElementById("kpi-container");
+  if (kpiContainer && cats.serviceCategories) {
+    kpiContainer.innerHTML = "";
+    cats.serviceCategories.forEach((cat) => {
+      if (cat.title !== "Brand Consistency & Expression") {
+        renderKPICard(cat, "kpi-container");
+      }
+    });
+    kpiContainer.innerHTML += `
+        <div class="kpi-card customize-card">
+            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
+              <span style="font-weight: 800; color: #555">Customize KPI</span>
+            </div>
+            <div class="customize-body">
+              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
+            </div>
+        </div>`;
+  }
+  const targetBody = document.getElementById("target-table-body");
+  if (targetBody && cats.serviceCategories) {
+    targetBody.innerHTML = "";
+    cats.serviceCategories.forEach((cat) => {
+      if (cat.title === "Brand Consistency & Expression") return;
+      const diff = (cat.score - 8).toFixed(1);
+      const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
+      const diffSign = diff >= 0 ? "+" : "";
+
+      const metaKey =
+        Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
+      const meta = META[metaKey] || { img: "check.png", short: cat.title };
+
+      targetBody.innerHTML += `
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
+                <td class="val-center">${cat.score}</td>
+                <td class="val-center">8</td>
+                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
+            </tr>`;
+    });
+  }
+
+  const staffBody = document.getElementById("staff-body");
+  if (staffBody && dashData.staffs) {
+    staffBody.innerHTML = "";
+    dashData.staffs.forEach((row) => {
+      const total = row.totalMentions || 0;
+      const pos = row.positive || 0;
+      const neg = row.negative || 0;
+      const posRatio = total > 0 ? (pos / total) * 100 : 0;
+      const negRatio = total > 0 ? (neg / total) * 100 : 0;
+      const ratioDisplay =
+        pos > 0
+          ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
+          : "0%";
+      const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
+          <td class="col-arrow">></td>
+          <td>${row.lastTimeMention || "-"}</td>
+          <td class="center">${total}</td>
+          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
+          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
+          <td class="right">${ratioDisplay}</td>`;
+      staffBody.appendChild(tr);
+    });
+  }
+}
+function renderComboChart(subject, competitors) {
+  const container = document.getElementById("combo-chart");
+  if (!container) return;
+  const allHotels = [subject, ...competitors];
+  const maxReviews = Math.max(
+    ...allHotels.map((h) => h.wtkSummary.review_count || 0),
+  );
+  const yMax = Math.ceil(maxReviews / 10) * 10 || 10;
+  let yAxisLeft = `<div style="grid-row: 1 / 2; grid-column: 1 / 2; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-right: 10px;">
+    <span style="font-weight: 600; color: #555">No. of reviews</span>`;
+
+  for (let i = 5; i >= 0; i--) {
+    yAxisLeft += `<span>${Math.round((yMax / 5) * i)}</span>`;
+  }
+  yAxisLeft += `</div>`;
+  const barCount = allHotels.length;
+  let barsHtml = "";
+  let polylinePoints = "";
+
+  allHotels.forEach((h, index) => {
+    const reviews = h.wtkSummary.review_count || 0;
+    const score = h.wtkSummary.overall_score_avg || 0;
+    const barHeightPx = (reviews / yMax) * 200;
+    const bg = index === 0 ? "#1F3B32" : "#3b556e";
+
+    barsHtml += `
+      <div style="width: 18px; height: 250px; display: flex; flex-direction: column-reverse; padding-bottom: 30px;">
+        <div style="height: ${barHeightPx}px; background: ${bg}; border-radius: 2px 2px 0 0;" title="${reviews} Reviews"></div>
+      </div>`;
+    const x = ((index + 0.5) / barCount) * 500;
+    const y = 250 - (score / 10) * 230;
+
+    polylinePoints += `${x},${y} `;
+  });
+
+  const chartArea = `
+    <div style="grid-row: 1 / 2; grid-column: 2 / 3; position: relative; height: 250px;">
+      <div style="position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-top: 20px;">
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #eee"></div>
+        <div style="width: 100%; height: 1px; background: #ccc"></div>
+      </div>
+
+      <div style="position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
+        ${barsHtml}
+      </div>
+
+      <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; overflow: visible;" viewBox="0 0 500 250" preserveAspectRatio="none">
+        <polyline points="${polylinePoints}" fill="none" stroke="#4472C4" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+        ${polylinePoints
+          .trim()
+          .split(" ")
+          .map(
+            (p) =>
+              `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="4" fill="#4472C4" />`,
+          )
+          .join("")}
+      </svg>
+    </div>`;
+  const yAxisRight = `
+    <div style="grid-row: 1 / 2; grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-left: 10px;">
+      <span style="font-weight: 600; color: #555">Score</span>
+      <span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
+    </div>`;
+  let xAxis = `<div style="grid-row: 2 / 3; grid-column: 2 / 3; display: flex; justify-content: space-around; font-size: 10px; color: #555; margin-top: 5px; text-align: center;">`;
+  allHotels.forEach((h) => {
+    let shortName = h.basicInfo.hotelName.substring(0, 10) + "..";
+    xAxis += `<span style="width: 18%;">${shortName}</span>`;
+  });
+  xAxis += `</div>`;
+  container.innerHTML = yAxisLeft + chartArea + yAxisRight + xAxis;
+  container.innerHTML += `
+    <div style="grid-row: 3 / 4; grid-column: 1 / 4; display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 11px; color: #666;">
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#1F3B32"></div> Review Vol (Subject)</div>
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#3b556e"></div> Review Vol (Comp)</div>
+       <div style="display: flex; align-items: center; gap: 5px"><div style="width:16px; height:2px; background:#4472C4"></div> Score Trend</div>
+    </div>
+  `;
 }
