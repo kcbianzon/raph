@@ -1,0 +1,239 @@
+{
+    "competitors": [
+        {
+            "basicInfo": {
+                "hotelId": "5489b0b7423be96ce79590e4e333a31c",
+                "hotelName": "Grand Hotel et de Milan - The Leading Hotels of the World",
+                "brand": null,
+                "country": "Italy",
+                "region": null,
+                "city": null,
+                "address": null,
+                "tag": null,
+                "latitude": null,
+                "longitude": null,
+                "star": 0,
+                "roomCount": 0,
+                "restaurants": null
+            },
+            "reviewSummary": {
+                "bookingReviews": 331,
+                "bookingScore": 8.9,
+                "expediaReviews": 576,
+                "expediaScore": 9.4,
+                "tripadvisorReviews": 1210,
+                "tripadvisorScore": 4.6,
+                "tripReviews": 63,
+                "tripScore": 9.2,
+                "googleReviews": 1038,
+                "googleScore": 4.7,
+                "agodaReviews": null,
+                "agodaScore": null,
+                "ctripReviews": null,
+                "ctripScore": null
+            },
+            "wtkSummary": {
+                "categories": {
+                    "Cleanliness": 4.1,
+                    "Room Comfort": 5.8,
+                    "Food & Beverage": 4.9,
+                    "Value for Money": 3.8,
+                    "Location & Neighbourhood": 7.4,
+                    "Hotel Atmosphere & Design": 9.0,
+                    "Guest Experience & Service": 8.6,
+                    "Hotel Amenities & Atmosphere": 6.5
+                },
+                "review_count": 110,
+                "overall_score_avg": 8.9
+            }
+        },
+        {
+            "basicInfo": {
+                "hotelId": "8cbccbc184222a39a6ee569ae4495ed0",
+                "hotelName": "Hotel Principe Di Savoia - Dorchester Collection",
+                "brand": null,
+                "country": "Italy",
+                "region": null,
+                "city": null,
+                "address": null,
+                "tag": null,
+                "latitude": null,
+                "longitude": null,
+                "star": 0,
+                "roomCount": 0,
+                "restaurants": null
+            },
+            "reviewSummary": {
+                "bookingReviews": 1176,
+                "bookingScore": 9.0,
+                "expediaReviews": 1002,
+                "expediaScore": 9.6,
+                "tripadvisorReviews": 2485,
+                "tripadvisorScore": 4.6,
+                "tripReviews": 114,
+                "tripScore": 9.3,
+                "googleReviews": 2754,
+                "googleScore": 4.7,
+                "agodaReviews": null,
+                "agodaScore": null,
+                "ctripReviews": null,
+                "ctripScore": null
+            },
+            "wtkSummary": {
+                "categories": {
+                    "Cleanliness": 3.8,
+                    "Room Comfort": 5.1,
+                    "Food & Beverage": 5.4,
+                    "Value for Money": 5.5,
+                    "Location & Neighbourhood": 4.0,
+                    "Hotel Atmosphere & Design": 8.0,
+                    "Guest Experience & Service": 8.3,
+                    "Hotel Amenities & Atmosphere": 6.5
+                },
+                "review_count": 217,
+                "overall_score_avg": 8.4
+            }
+        },
+        {
+            "basicInfo": {
+                "hotelId": "a86105d3c12783d0dc1dd1363adf9bb5",
+                "hotelName": "Casa Brera, a Luxury Collection Hotel, Milan",
+                "brand": null,
+                "country": "Italy",
+                "region": null,
+                "city": null,
+                "address": null,
+                "tag": null,
+                "latitude": null,
+                "longitude": null,
+                "star": 0,
+                "roomCount": 0,
+                "restaurants": null
+            },
+            "reviewSummary": {
+                "bookingReviews": 110,
+                "bookingScore": 9.2,
+                "expediaReviews": 37,
+                "expediaScore": 9.4,
+                "tripadvisorReviews": 41,
+                "tripadvisorScore": 4.6,
+                "tripReviews": 72,
+                "tripScore": 9.2,
+                "googleReviews": 220,
+                "googleScore": 4.3,
+                "agodaReviews": null,
+                "agodaScore": null,
+                "ctripReviews": null,
+                "ctripScore": null
+            },
+            "wtkSummary": {
+                "categories": {
+                    "Cleanliness": 2.5,
+                    "Room Comfort": 4.9,
+                    "Food & Beverage": 4.8,
+                    "Value for Money": 3.7,
+                    "Location & Neighbourhood": 7.4,
+                    "Hotel Atmosphere & Design": 9.0,
+                    "Guest Experience & Service": 7.3,
+                    "Hotel Amenities & Atmosphere": 5.7
+                },
+                "review_count": 101,
+                "overall_score_avg": 7.9
+            }
+        },
+        {
+            "basicInfo": {
+                "hotelId": "daa8fee4f474dc9a52478d96cec1faa7",
+                "hotelName": "The Westin Palace, Milan",
+                "brand": null,
+                "country": "Italy",
+                "region": null,
+                "city": null,
+                "address": null,
+                "tag": null,
+                "latitude": null,
+                "longitude": null,
+                "star": 0,
+                "roomCount": 0,
+                "restaurants": null
+            },
+            "reviewSummary": {
+                "bookingReviews": 1007,
+                "bookingScore": 8.1,
+                "expediaReviews": 1001,
+                "expediaScore": 8.6,
+                "tripadvisorReviews": 1430,
+                "tripadvisorScore": 4.1,
+                "tripReviews": 139,
+                "tripScore": 8.5,
+                "googleReviews": 2888,
+                "googleScore": 4.4,
+                "agodaReviews": null,
+                "agodaScore": null,
+                "ctripReviews": null,
+                "ctripScore": null
+            },
+            "wtkSummary": {
+                "categories": {
+                    "Cleanliness": 4.3,
+                    "Room Comfort": 5.5,
+                    "Food & Beverage": 5.0,
+                    "Value for Money": 4.2,
+                    "Location & Neighbourhood": 6.2,
+                    "Hotel Atmosphere & Design": 6.0,
+                    "Guest Experience & Service": 6.5,
+                    "Hotel Amenities & Atmosphere": 5.6
+                },
+                "review_count": 133,
+                "overall_score_avg": 7.0
+            }
+        }
+    ],
+    "subject": {
+        "basicInfo": {
+            "hotelId": "df032c447615b9a768fd1683896849fa",
+            "hotelName": "Excelsior Hotel Gallia, a Luxury Collection Hotel, Milan",
+            "brand": null,
+            "country": "Italy",
+            "region": null,
+            "city": null,
+            "address": null,
+            "tag": null,
+            "latitude": null,
+            "longitude": null,
+            "star": 0,
+            "roomCount": 0,
+            "restaurants": null
+        },
+        "reviewSummary": {
+            "bookingReviews": 613,
+            "bookingScore": 8.9,
+            "expediaReviews": 1001,
+            "expediaScore": 9.4,
+            "tripadvisorReviews": 1753,
+            "tripadvisorScore": 4.6,
+            "tripReviews": 74,
+            "tripScore": 9.0,
+            "googleReviews": 2806,
+            "googleScore": 4.7,
+            "agodaReviews": null,
+            "agodaScore": null,
+            "ctripReviews": null,
+            "ctripScore": null
+        },
+        "wtkSummary": {
+            "categories": {
+                "Cleanliness": 3.3,
+                "Room Comfort": 4.9,
+                "Food & Beverage": 4.9,
+                "Value for Money": 4.4,
+                "Location & Neighbourhood": 5.8,
+                "Hotel Atmosphere & Design": 8.8,
+                "Guest Experience & Service": 7.6,
+                "Hotel Amenities & Atmosphere": 5.8
+            },
+            "review_count": 333,
+            "overall_score_avg": 8.4
+        }
+    }
+}

@@ -114,42 +114,146 @@ const META = {
     short: "Value",
   },
 };
+/* =========================================
+   2. HARDCODED STAFF DATA
+   ========================================= */
+const STAFF_DATA = [
+  { name: "Staff", initial: "S", date: "2025-12-24", total: 8, pos: 8, neg: 0 },
+  {
+    name: "Front Desk",
+    initial: "F",
+    date: "2025-12-25",
+    total: 4,
+    pos: 0,
+    neg: 4,
+  },
+  {
+    name: "Manager",
+    initial: "M",
+    date: "2025-12-24",
+    total: 3,
+    pos: 1,
+    neg: 2,
+  },
+  {
+    name: "Hotel Staff",
+    initial: "H",
+    date: "2025-12-20",
+    total: 3,
+    pos: 3,
+    neg: 0,
+  },
+  {
+    name: "Housekeeping",
+    initial: "H",
+    date: "2025-12-24",
+    total: 2,
+    pos: 1,
+    neg: 1,
+  },
+  {
+    name: "Arabic-speaking employee",
+    initial: "A",
+    date: "2025-12-27",
+    total: 1,
+    pos: 1,
+    neg: 0,
+  },
+  {
+    name: "Mahmoud",
+    initial: "M",
+    date: "2025-12-27",
+    total: 1,
+    pos: 1,
+    neg: 0,
+  },
+  {
+    name: "Event Planning",
+    initial: "E",
+    date: "2025-12-24",
+    total: 1,
+    pos: 1,
+    neg: 0,
+  },
+  {
+    name: "General Staff",
+    initial: "G",
+    date: "2025-12-24",
+    total: 1,
+    pos: 1,
+    neg: 0,
+  },
+  {
+    name: "Martina Nicotra",
+    initial: "M",
+    date: "2025-12-17",
+    total: 1,
+    pos: 1,
+    neg: 0,
+  },
+  {
+    name: "Floor staff",
+    initial: "F",
+    date: "2025-12-05",
+    total: 1,
+    pos: 0,
+    neg: 1,
+  },
+  {
+    name: "ragazza della reception",
+    initial: "r",
+    date: "2025-12-05",
+    total: 1,
+    pos: 0,
+    neg: 1,
+  },
+  {
+    name: "ragazzo",
+    initial: "r",
+    date: "2025-12-05",
+    total: 1,
+    pos: 0,
+    neg: 1,
+  },
+  {
+    name: "Receptionist",
+    initial: "R",
+    date: "2025-12-05",
+    total: 1,
+    pos: 0,
+    neg: 1,
+  },
+];
 
 /* =========================================
-   2. RENDER FUNCTIONS
+   3. RENDER FUNCTIONS
    ========================================= */
-
 function renderKPICard(cat, containerId) {
+  // Calculate percentages
   const total = cat.total || 1;
   const posPct = Math.round((cat.positive / total) * 100);
   const negPct = Math.round((cat.negative / total) * 100);
   const neuPct = Math.round((cat.neutral / total) * 100);
+
+  // Robust Meta Lookup: Try to find a key that contains the title part
   const metaKey =
     Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
   const meta = META[metaKey] || {
+    icon: "ic-check",
     img: "check.png",
-    short: cat.title.split(" ")[0],
+    title: cat.title,
+    short: cat.title,
   };
+
+  // Chart Dashes
   const greenDash = `${posPct}, 100`;
   const yellowDash = `${neuPct}, 100`;
   const yellowOffset = -posPct;
   const redDash = `${negPct}, 100`;
   const redOffset = -(posPct + neuPct);
-  const getPos = (offsetPct, valPct) => {
-    if (valPct <= 0) return null;
-    const midPct = offsetPct + valPct / 2;
-    const angleDeg = midPct * 3.6 - 90;
-    const angleRad = angleDeg * (Math.PI / 180);
-    const radius = 68;
-    const left = 50 + radius * Math.cos(angleRad);
-    const top = 50 + radius * Math.sin(angleRad);
 
-    return `top: ${top}%; left: ${left}%;`;
-  };
-
-  const posStyle = getPos(0, posPct);
-  const neuStyle = getPos(posPct, neuPct);
-  const negStyle = getPos(posPct + neuPct, negPct);
+  // FIX: Use meta.img for icon and meta.short for text
+  // FIX: Display percentages even if 0 to ensure alignment
   const html = `
     <div class="kpi-card">
       <div class="kpi-head">
@@ -159,18 +263,13 @@ function renderKPICard(cat, containerId) {
         </span>
         <span class="kpi-goal">Goal: 8</span>
       </div>
-      <div class="kpi-chart-wrap" style="overflow: visible;">
-        
-        ${posPct > 0 ? `<span class="kpi-lbl" style="${posStyle} position:absolute; transform:translate(-50%, -50%); color:#2FAA68; font-size:11px; font-weight:800;">${posPct}%</span>` : ""}
-        ${neuPct > 0 ? `<span class="kpi-lbl" style="${neuStyle} position:absolute; transform:translate(-50%, -50%); color:#EFB82C; font-size:11px; font-weight:800;">${neuPct}%</span>` : ""}
-        ${negPct > 0 ? `<span class="kpi-lbl" style="${negStyle} position:absolute; transform:translate(-50%, -50%); color:#CE4049; font-size:11px; font-weight:800;">${negPct}%</span>` : ""}
-
-        <svg viewBox="0 0 36 36" style="transform: rotate(0deg);">
-          <g transform="rotate(-90 18 18)">
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2FAA68" stroke-width="3" stroke-dasharray="${greenDash}" />
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#EFB82C" stroke-width="3" stroke-dasharray="${yellowDash}" stroke-dashoffset="${yellowOffset}" />
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#CE4049" stroke-width="3" stroke-dasharray="${redDash}" stroke-dashoffset="${redOffset}" />
-          </g>
+      <div class="kpi-chart-wrap">
+        <span class="kpi-lbl" style="top:-10px; left:5px; font-size:12px">${neuPct}%</span>
+        <span class="kpi-lbl" style="bottom:-10px; right:-5px; font-size:12px">${posPct}%</span>
+        <svg viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2FAA68" stroke-width="3" stroke-dasharray="${greenDash}" />
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#EFB82C" stroke-width="3" stroke-dasharray="${yellowDash}" stroke-dashoffset="${yellowOffset}" />
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#CE4049" stroke-width="3" stroke-dasharray="${redDash}" stroke-dashoffset="${redOffset}" />
         </svg>
         <div class="kpi-score">${cat.score}</div>
       </div>
@@ -178,103 +277,60 @@ function renderKPICard(cat, containerId) {
 
   document.getElementById(containerId).innerHTML += html;
 }
-
-function renderCategoryPage7(catData, weeklyData, countData, containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  const meta = META[catData.category] || { icon: "ic-loc" };
+function renderCategory(catData, weeklyData, countData, containerId) {
+  const meta = META[catData.category] || {
+    code: "gen",
+    colorClass: "c-blue",
+    textClass: "t-blue",
+    icon: "",
+  };
   const scores = weeklyData[catData.category] || [null, null, null, null, null];
   const reviewCount =
     countData && countData[catData.category]
       ? countData[catData.category]
       : catData.count_total || 0;
 
-  let dotClass = "dot-hollow";
-  if (reviewCount > 15) dotClass = "dot-green";
-  else if (reviewCount > 5) dotClass = "dot-gold";
-
-  let tableRows = `
-    <tr>
-      <th style="text-align:left; color:#999; font-weight:400; font-size:12px; padding:8px;">Performance</th>
-      <th style="font-weight:400; font-size:12px; color:#999;">Week 1</th>
-      <th style="font-weight:400; font-size:12px; color:#999;">Week 2</th>
-      <th style="font-weight:400; font-size:12px; color:#999;">Week 3</th>
-      <th style="font-weight:400; font-size:12px; color:#999;">Week 4</th>
-      <th style="font-weight:400; font-size:12px; color:#999;">Week 5</th>
-      <th style="color:#4472C4; letter-spacing:1px; text-transform:uppercase; font-size:10px; font-weight:700;">...... Goal</th>
-    </tr>
-    <tr>
-      <td style="color:#666; font-size:12px; padding:8px;">Score</td>`;
-
+  let tableRows = `<tr><th>Performance</th><th>Week 1</th><th>Week 2</th><th>Week 3</th><th>Week 4</th><th>Week 5</th><th style="color:#5C86C8; letter-spacing:2px;">••••• Goal</th></tr><tr><td>Score</td>`;
   let points = [];
   scores.forEach((s, i) => {
     let cls = "";
     let val = "-";
     if (s !== null) {
       val = s;
-      if (s >= 8) cls = "txt-green";
-      else if (s >= 6) cls = "txt-orange";
-      else cls = "txt-red";
-      const x = 30 + i * 50;
-      const y = (10 - s) * 15;
-      points.push([x, y]);
+      if (s >= 8) cls = "score-green";
+      else if (s >= 6) cls = "score-orange";
+      else cls = "score-red";
+      const x = 30 + i * 55;
+      const y = 80 - s * 8;
+      points.push(`${x},${y}`);
     }
-    tableRows += `<td class="${cls}" style="text-align:center;">${val}</td>`;
+    tableRows += `<td class="${cls}">${val}</td>`;
   });
-  tableRows += `<td class="txt-black" style="text-align:center;">8</td></tr>`;
-
-  let pathLine = getSmoothPath(points);
-  let pathFill = "";
-  if (points.length > 0) {
-    const last = points[points.length - 1];
-    const first = points[0];
-    pathFill = `${pathLine} L ${last[0]},80 L ${first[0]},80 Z`;
-  }
-
-  const iconPos =
-    "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRl_9WLZWz8V74FWrJkf6BmE7-mvIdfnRe83Nzg8QXHvRiPMR9y";
-  const iconNeg =
-    "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcT-FaAWkfFJ7f1vh26wXTHzlttDvPblpLkHGuVbIRkOioC3NvXp";
+  tableRows += `<td>8</td></tr>`;
+  let d = points.length > 0 ? "M" + points.join(" L") : "";
 
   const html = `
-    <div class="cat-block" style="margin-bottom: 50px;">
-      <div class="cat-header-row">
-        <div class="cat-gold-line"></div>
-        <div class="cat-title-text"><i class="icon ${meta.icon}"></i> ${catData.category}</div>
-        <div class="cat-separator"></div>
-        <div class="cat-reviews-text"><span class="${dotClass}"></span> Reviews: ${reviewCount}</div>
-      </div>
-      <div style="font-size: 13px; color: #555; margin-bottom: 20px; line-height:1.5;">
-        <span style="color:#666;">Comment:</span> ${catData.trend}
-      </div>
-      <div class="viz-row" style="display: flex; gap: 20px; align-items: flex-start;">
-        <div class="chart-container-smooth">
-          <svg viewBox="0 0 280 80" style="width:100%; height:100%; overflow:visible;">
-             <defs>
-               <linearGradient id="gradBlue${containerId}" x1="0%" y1="0%" x2="0%" y2="100%">
-                 <stop offset="0%" style="stop-color:#4472C4;stop-opacity:0.2" />
-                 <stop offset="100%" style="stop-color:#4472C4;stop-opacity:0" />
-               </linearGradient>
-             </defs>
-             <line x1="10" y1="30" x2="270" y2="30" stroke="#4472C4" stroke-width="1" stroke-dasharray="2,2" opacity="0.6" />
-             <path d="${pathFill}" fill="url(#gradBlue${containerId})" stroke="none" />
-             <path d="${pathLine}" fill="none" stroke="#4472C4" stroke-width="2" />
-          </svg>
+    <div class="cat-block">
+      <div class="cat-header">
+        <div class="cat-bar ${meta.colorClass}"></div>
+        <div class="cat-icon-box ${meta.colorClass}" style="border-radius:50%; padding:4px;">
+          <i class="icon ${meta.icon}"></i>
         </div>
-        <table class="data-table" style="flex: 1; border: 1px solid #eee; margin-left:10px; border-collapse:collapse;">${tableRows}</table>
+        <div class="cat-name">${catData.category}</div>
+        <div class="cat-reviews"><span class="dot-reviews"></span> Reviews: ${reviewCount}</div>
       </div>
-      <div style="display:flex; gap:20px; margin-top:15px;">
-         <div style="flex:1; background:rgba(47, 170, 104, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
-            <img src="${iconPos}" class="icon-img-sm"><div style="line-height:1.4;">${catData.positive}</div>
-         </div>
-         <div style="flex:1; background:rgba(206, 64, 73, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
-            <img src="${iconNeg}" class="icon-img-sm"><div style="line-height:1.4;">${catData.negative}</div>
-         </div>
+      <div class="cat-comment"><strong>Comment:</strong> ${catData.trend}</div>
+      <div class="viz-row">
+        <div class="chart-box"><svg class="chart-svg"><line x1="0" y1="40" x2="280" y2="40" class="chart-base" /><path d="${d}" class="chart-line" /></svg></div>
+        <table class="data-table">${tableRows}</table>
+      </div>
+      <div class="highlight-grid">
+        <div class="highlight-box hl-pos"><div class="hl-icon"><i class="icon ic-check"></i></div>${catData.positive}</div>
+        <div class="highlight-box hl-neg"><div class="hl-icon"><i class="icon ic-alert"></i></div>${catData.negative}</div>
       </div>
     </div>`;
-
-  if (container) container.innerHTML += html;
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML += html;
 }
 
 function renderSolutionItem(item, containerId) {
@@ -285,8 +341,13 @@ function renderSolutionItem(item, containerId) {
   };
   const html = `
     <div class="sol-item">
-      <div class="sol-icon-circle ${meta.color}"><div class="sol-icon-inner ${meta.icon}"></div></div>
-      <div class="sol-content"><div class="sol-title">${meta.title}</div><div class="sol-text">${item.action}</div></div>
+      <div class="sol-icon-circle ${meta.color}">
+        <div class="sol-icon-inner ${meta.icon}"></div>
+      </div>
+      <div class="sol-content">
+        <div class="sol-title">${meta.title}</div>
+        <div class="sol-text">${item.action}</div>
+      </div>
     </div>`;
   const el = document.getElementById(containerId);
   if (el) el.innerHTML += html;
@@ -324,8 +385,123 @@ function getSmoothPath(points) {
   );
 }
 
+function renderCategoryPage7(catData, weeklyData, countData, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const meta = META[catData.category] || { icon: "ic-loc" };
+  const scores = weeklyData[catData.category] || [null, null, null, null, null];
+  const reviewCount =
+    countData && countData[catData.category]
+      ? countData[catData.category]
+      : catData.count_total || 0;
+
+  let dotClass = "dot-hollow";
+  if (reviewCount > 15) dotClass = "dot-green";
+  else if (reviewCount > 5) dotClass = "dot-gold";
+  let tableRows = `
+    <tr>
+      <th style="text-align:left; color:#999; font-weight:400; font-size:12px; padding:8px;">Performance</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 1</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 2</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 3</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 4</th>
+      <th style="font-weight:400; font-size:12px; color:#999;">Week 5</th>
+      <th style="color:#4472C4; letter-spacing:1px; text-transform:uppercase; font-size:10px; font-weight:700;">...... Goal</th>
+    </tr>
+    <tr>
+      <td style="color:#666; font-size:12px; padding:8px;">Score</td>`;
+
+  let points = [];
+  scores.forEach((s, i) => {
+    let cls = "";
+    let val = "-";
+    if (s !== null) {
+      val = s;
+      if (s >= 8) cls = "txt-green";
+      else if (s >= 6) cls = "txt-orange";
+      else cls = "txt-red";
+
+      const x = 30 + i * 50;
+      const y = (10 - s) * 15;
+      points.push([x, y]);
+    }
+    tableRows += `<td class="${cls}" style="text-align:center;">${val}</td>`;
+  });
+  tableRows += `<td class="txt-black" style="text-align:center;">8</td></tr>`;
+  let pathLine = getSmoothPath(points);
+  let pathFill = "";
+  if (points.length > 0) {
+    const last = points[points.length - 1];
+    const first = points[0];
+    pathFill = `${pathLine} L ${last[0]},80 L ${first[0]},80 Z`;
+  }
+
+  const iconPos =
+    "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRl_9WLZWz8V74FWrJkf6BmE7-mvIdfnRe83Nzg8QXHvRiPMR9y";
+  const iconNeg =
+    "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcT-FaAWkfFJ7f1vh26wXTHzlttDvPblpLkHGuVbIRkOioC3NvXp";
+
+  const html = `
+    <div class="cat-block" style="margin-bottom: 50px;">
+      <div class="cat-header-row">
+        <div class="cat-gold-line"></div>
+        <div class="cat-title-text">
+           <i class="icon ${meta.icon}"></i> ${catData.category}
+        </div>
+        <div class="cat-separator"></div>
+        <div class="cat-reviews-text">
+           <span class="${dotClass}"></span> Reviews: ${reviewCount}
+        </div>
+      </div>
+
+      <div style="font-size: 13px; color: #555; margin-bottom: 20px; line-height:1.5;">
+        <span style="color:#666;">Comment:</span> ${catData.trend}
+      </div>
+
+      <div class="viz-row" style="display: flex; gap: 20px; align-items: flex-start;">
+        <div class="chart-container-smooth">
+          <svg viewBox="0 0 280 80" style="width:100%; height:100%; overflow:visible;">
+             <defs>
+               <linearGradient id="gradBlue${containerId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                 <stop offset="0%" style="stop-color:#4472C4;stop-opacity:0.2" />
+                 <stop offset="100%" style="stop-color:#4472C4;stop-opacity:0" />
+               </linearGradient>
+             </defs>
+             <line x1="10" y1="30" x2="270" y2="30" stroke="#4472C4" stroke-width="1" stroke-dasharray="2,2" opacity="0.6" />
+             <path d="${pathFill}" fill="url(#gradBlue${containerId})" stroke="none" />
+             <path d="${pathLine}" fill="none" stroke="#4472C4" stroke-width="2" />
+          </svg>
+        </div>
+
+        <table class="data-table" style="flex: 1; border: 1px solid #eee; margin-left:10px; border-collapse:collapse;">
+           ${tableRows}
+        </table>
+      </div>
+      
+      <div style="display:flex; gap:20px; margin-top:15px;">
+         <div style="flex:1; background:rgba(47, 170, 104, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
+            <img src="${iconPos}" class="icon-img-sm">
+            <div style="line-height:1.4;">${catData.positive}</div>
+         </div>
+         <div style="flex:1; background:rgba(206, 64, 73, 0.08); padding:12px; border-radius:6px; font-size:13px; color:#333; display:flex; gap:10px; align-items:flex-start;">
+            <img src="${iconNeg}" class="icon-img-sm">
+            <div style="line-height:1.4;">${catData.negative}</div>
+         </div>
+      </div>
+    </div>`;
+
+  if (container) container.innerHTML += html;
+}
+
+/* =========================================
+   4. RENDER ALL (DYNAMIC RE-RENDER)
+   ========================================= */
+
 function renderReport(data) {
-  window.REPORT_DATA = data;
+  window.REPORT_DATA = data; // Store data globally
+
+  // 1. Clear existing dynamic containers to avoid duplication
   const idsToClear = [
     "cat-container-1",
     "cat-container-2",
@@ -339,6 +515,7 @@ function renderReport(data) {
     if (el) el.innerHTML = "";
   });
 
+  // 2. Cover Page
   let name =
     data.hotel_name ||
     (data.data_overview
@@ -355,6 +532,7 @@ function renderReport(data) {
     .querySelectorAll(".date-placeholder")
     .forEach((el) => (el.textContent = `${dateObj.month}, ${dateObj.year}`));
 
+  // 3. Overview (Page 5)
   if (data.data_overview)
     document.getElementById("total-reviews").textContent =
       data.data_overview.total_reviews;
@@ -381,6 +559,7 @@ function renderReport(data) {
     }
   }
 
+  // 4. Insights (Highlight, Issue, Trend, Top Lists)
   if (data.insights) {
     document.getElementById("txt-highlight").textContent =
       data.insights.highlight;
@@ -389,22 +568,26 @@ function renderReport(data) {
       data.insights.trend_insights;
     const posCont = document.getElementById("list-positives");
     const negCont = document.getElementById("list-negatives");
-    if (data.insights.strengths)
+    if (data.insights.strengths) {
       data.insights.strengths.slice(0, 5).forEach((item, i) => {
         posCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
       });
-    if (data.insights.improvements)
+    }
+    if (data.insights.improvements) {
       data.insights.improvements.slice(0, 5).forEach((item, i) => {
         negCont.innerHTML += `<div class="list-item"><span class="item-num">${i + 1}</span><span>${item.phrase}</span></div>`;
       });
+    }
   }
 
+  // 5. Categories (Page 7 & 8)
   const weeklyData = {};
   const countData = data.category_counts || {};
-  if (data.insights && data.insights.category_summary)
+  if (data.insights && data.insights.category_summary) {
     data.insights.category_summary.forEach(
       (c) => (weeklyData[c.category] = [null, null, null, null, null]),
     );
+  }
   const trends =
     data.weekly_category_trend ||
     (data.insights ? data.insights.weekly_category_trend : null);
@@ -438,6 +621,7 @@ function renderReport(data) {
     if (cat) renderCategoryPage7(cat, weeklyData, countData, "cat-container-2");
   });
 
+  // 6. Solutions (Page 9 & 10)
   if (data.solution) {
     if (data.solution.overall)
       document.getElementById("mgmt-focus-text").innerText =
@@ -453,6 +637,7 @@ function renderReport(data) {
     }
   }
 
+  // 7. Contact Info
   const contact = data.contact_info || {
     email: "info@wheretoknow.com",
     website: "www.wheretoknow.com",
@@ -468,70 +653,119 @@ function renderReport(data) {
   document.getElementById("c-addr1").textContent = contact.address_line_1;
   document.getElementById("c-addr2").textContent = contact.address_line_2;
 }
-
 /* =========================================
-   4. MAIN INITIALIZATION & DASHBOARD
+   4. MAIN INITIALIZATION
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initial Load
+  // 1. Fetch BOTH data files
   Promise.all([
     fetch("data.json").then((r) => r.json()),
     fetch("dashboard.json").then((r) => r.json()),
-    fetch("competitors.json").then((r) => r.json()),
   ])
-    .then(([mainData, dashData, compData]) => {
+    .then(([mainData, dashData]) => {
       window.REPORT_DATA = mainData;
       window.DASH_DATA = dashData;
-      window.COMP_DATA = compData;
 
-      renderReport(mainData); // Pages 1, 5-10
-      renderDashboardPage(dashData); // Pages 2-3
-      if (compData) renderCompetitorsPage(compData); // Page 4
+      // --- RENDER MAIN REPORT (Existing Logic) ---
+      renderReport(mainData);
+
+      // --- RENDER DASHBOARD (PAGE 2) ---
+      const cats = dashData.categories;
+
+      // 1. Overview Donut
+      if (cats) {
+        document.getElementById("dash-score").textContent = cats.score;
+        const total = cats.total || 1;
+        document.getElementById("dash-pos-lbl").textContent =
+          Math.round((cats.positive / total) * 100) + "%";
+        document.getElementById("dash-neu-lbl").textContent =
+          Math.round((cats.neutral / total) * 100) + "%";
+        document.getElementById("dash-neg-lbl").textContent =
+          Math.round((cats.negative / total) * 100) + "%";
+      }
+
+      // 2. KPI Cards
+      const kpiContainer = document.getElementById("kpi-container");
+      if (kpiContainer && cats.serviceCategories) {
+        kpiContainer.innerHTML = ""; // Clear
+        cats.serviceCategories.forEach((cat) => {
+          // Skip "Brand Consistency" if you don't want it in KPI grid
+          if (cat.title !== "Brand Consistency & Expression") {
+            renderKPICard(cat, "kpi-container");
+          }
+        });
+        // Re-add the "Customize" card at the end
+        kpiContainer.innerHTML += `
+        <div class="kpi-card customize-card">
+            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
+              <span style="font-weight: 800; color: #555">Customize KPI</span>
+            </div>
+            <div class="customize-body">
+              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
+            </div>
+        </div>`;
+      }
+      const targetBody = document.getElementById("target-table-body");
+      if (targetBody && cats.serviceCategories) {
+        targetBody.innerHTML = "";
+        cats.serviceCategories.forEach((cat) => {
+          if (cat.title === "Brand Consistency & Expression") return;
+          const diff = (cat.score - 8).toFixed(1);
+          const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
+          const diffSign = diff >= 0 ? "+" : "";
+
+          let iconName = "location";
+          if (cat.title.includes("Location")) iconName = "location";
+          else if (cat.title.includes("Cleanliness")) iconName = "cleanliness";
+          else if (cat.title.includes("Comfort")) iconName = "comfort";
+          else if (cat.title.includes("Amenities")) iconName = "amenities";
+          else if (cat.title.includes("Food")) iconName = "food";
+          else if (cat.title.includes("Guest")) iconName = "guest";
+          else if (cat.title.includes("Value")) iconName = "money";
+
+          targetBody.innerHTML += `
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+                <td><img src="assets/${iconName}.png" class="tiny-icon" /> ${cat.title}</td>
+                <td class="val-center">${cat.score}</td>
+                <td class="val-center">8</td>
+                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
+            </tr>`;
+        });
+      }
+      const staffBody = document.getElementById("staff-body");
+      if (staffBody && dashData.staffs) {
+        staffBody.innerHTML = "";
+        dashData.staffs.forEach((row) => {
+          const total = row.totalMentions || 0;
+          const pos = row.positive || 0;
+          const neg = row.negative || 0;
+
+          const posRatio = total > 0 ? (pos / total) * 100 : 0;
+          const negRatio = total > 0 ? (neg / total) * 100 : 0;
+          const ratioDisplay =
+            pos > 0
+              ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
+              : "0%";
+          const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
+          <td class="col-arrow">></td>
+          <td>${row.lastTimeMention || "-"}</td>
+          <td class="center">${total}</td>
+          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
+          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
+          <td class="right">${ratioDisplay}</td>`;
+          staffBody.appendChild(tr);
+        });
+      }
     })
     .catch((err) => logError("Data Load Failed", err));
-
-  // 2. Helper for File Uploads
-  const setupUpload = (id, callback) => {
-    const input = document.getElementById(id);
-    if (!input) return;
-    input.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        try {
-          const json = JSON.parse(e.target.result);
-          callback(json); // Run the specific render function
-          closeUploadModal();
-          alert("Data updated successfully!");
-        } catch (err) {
-          alert("Invalid JSON file");
-          console.error(err);
-        }
-      };
-      reader.readAsText(file);
-      // Reset input so same file can be selected again
-      e.target.value = "";
-    });
-  };
-
-  // 3. Attach Listeners to the 3 Inputs
-  setupUpload("file-dashboard", (json) => renderDashboardPage(json));
-  setupUpload("file-competitors", (json) =>
-    renderCompetitorsPage({
-      subject: window.COMP_DATA.subject,
-      competitors: json.competitors || json,
-    }),
-  );
-  // Note: For competitors, we assume the JSON structure matches. If uploading full structure, pass directly.
-  // Ideally, user uploads the full 'competitors.json' structure.
-  setupUpload("file-competitors", (json) => renderCompetitorsPage(json));
-
-  setupUpload("file-main", (json) => renderReport(json));
 });
 
 /* =========================================
-   5. DOWNLOAD FUNCTIONS
+   6. DOWNLOAD FUNCTIONS
    ========================================= */
 
 function downloadJSON() {
@@ -547,8 +781,11 @@ function downloadJSON() {
 
 function downloadExcel() {
   if (!window.REPORT_DATA) return alert("No data loaded");
+
   const data = window.REPORT_DATA;
   const wb = XLSX.utils.book_new();
+
+  // 1. Overview Sheet
   const overviewData = [
     ["Hotel Name", data.hotel_name || ""],
     ["Period", data.period_label || ""],
@@ -561,6 +798,29 @@ function downloadExcel() {
   ];
   const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
   XLSX.utils.book_append_sheet(wb, wsOverview, "Overview");
+
+  // 2. Categories Sheet
+  if (data.insights && data.insights.category_summary) {
+    const catRows = [
+      ["Category", "Score", "Positive Highlights", "Negative Highlights"],
+    ];
+    data.insights.category_summary.forEach((c) => {
+      catRows.push([c.category, c.score, c.positive, c.negative]);
+    });
+    const wsCats = XLSX.utils.aoa_to_sheet(catRows);
+    XLSX.utils.book_append_sheet(wb, wsCats, "Categories");
+  }
+
+  // 3. Solutions Sheet
+  if (data.solution && data.solution.category_solutions) {
+    const solRows = [["Category", "Suggested Action"]];
+    data.solution.category_solutions.forEach((s) => {
+      solRows.push([s.category, s.action]);
+    });
+    const wsSols = XLSX.utils.aoa_to_sheet(solRows);
+    XLSX.utils.book_append_sheet(wb, wsSols, "Solutions");
+  }
+
   XLSX.writeFile(wb, "hotel-report-data.xlsx");
 }
 
@@ -573,6 +833,7 @@ function downloadHTML() {
   link.click();
 }
 
+//DOWNLOAD PDF [IMPORTANT]
 async function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const btn = document.querySelector(".btn-primary");
@@ -581,11 +842,15 @@ async function downloadPDF() {
   btn.innerText = "Generating PDF... (Please Wait)";
   btn.style.opacity = "0.7";
   btn.disabled = true;
-
   document.body.classList.add("pdf-mode");
 
   try {
-    const doc = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+    const doc = new jsPDF({
+      orientation: "p",
+      unit: "pt",
+      format: "a4",
+    });
+
     const pdfWidth = doc.internal.pageSize.getWidth();
     const pdfHeight = doc.internal.pageSize.getHeight();
     const pages = document.querySelectorAll(".page");
@@ -597,10 +862,14 @@ async function downloadPDF() {
         useCORS: true,
         windowWidth: 1240,
       });
+
       const imgData = canvas.toDataURL("image/jpeg", 0.98);
+
       if (i > 0) doc.addPage();
+
       doc.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
     }
+
     doc.save("hotel-report.pdf");
   } catch (err) {
     console.error(err);
@@ -610,237 +879,5 @@ async function downloadPDF() {
     btn.innerText = originalText;
     btn.style.opacity = "1";
     btn.disabled = false;
-  }
-}
-function renderCompetitorsPage(data) {
-  const subject = data.subject;
-  const comps = data.competitors;
-  const subjScore = subject.wtkSummary.overall_score_avg || 0;
-  document.getElementById("comp-subject-score").textContent =
-    subjScore.toFixed(1);
-  let compSum = 0;
-  let compCount = 0;
-  comps.forEach((c) => {
-    if (c.wtkSummary.overall_score_avg) {
-      compSum += c.wtkSummary.overall_score_avg;
-      compCount++;
-    }
-  });
-  const compAvg = compCount > 0 ? compSum / compCount : 1;
-  const ratio = compAvg > 0 ? subjScore / compAvg : 1;
-  const ratioDisplay = ratio.toFixed(2);
-  let rotation = (ratio - 1) * 180;
-  if (rotation < -90) rotation = -90;
-  if (rotation > 90) rotation = 90;
-
-  const needle = document.getElementById("comp-needle");
-  const ratioText = document.getElementById("comp-ratio-val");
-
-  if (needle)
-    needle.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-  if (ratioText) {
-    ratioText.textContent = ratioDisplay;
-    ratioText.style.color = ratio >= 1 ? "#2FAA68" : "#CE4049";
-  }
-  const listContainer = document.getElementById("comp-list-container");
-  if (listContainer) {
-    listContainer.innerHTML = "";
-    comps.forEach((c, index) => {
-      const score = c.wtkSummary.overall_score_avg || 0;
-      const colors = ["#3b556e", "#917b9f", "#9fb0c8", "#c5a665", "#7a62ae"];
-      const barColor = colors[index % colors.length];
-      const widthPct = (score / 10) * 100;
-
-      const html = `
-          <div class="comp-row">
-            <span class="comp-name" title="${c.basicInfo.hotelName}">${c.basicInfo.hotelName}</span>
-            <div class="bar-container">
-              <div class="bar-fill" style="width: ${widthPct}%; background: ${barColor}">
-                ${score.toFixed(1)}
-              </div>
-            </div>
-          </div>`;
-      listContainer.innerHTML += html;
-    });
-  }
-  const tableHead = document.getElementById("comp-table-head");
-  const tableBody = document.getElementById("comp-table-body");
-
-  if (tableHead && tableBody) {
-    let headHtml = `<th style="text-align: left; padding: 15px 10px; font-weight: 700; color: #333;">Category</th>`;
-    headHtml += `
-      <th style="text-align: center; padding: 15px 10px; font-weight: 600; background-color: #f8fbff; border-bottom: 2px solid #3aa49d;">
-        ${subject.basicInfo.hotelName.substring(0, 15)}...
-      </th>`;
-    comps.forEach((c) => {
-      headHtml += `<th style="text-align: center; padding: 15px 10px; font-weight: 600;">${c.basicInfo.hotelName.substring(0, 15)}...</th>`;
-    });
-    headHtml += `
-      <th style="text-align: center; padding: 15px 10px; font-weight: 700; color: #333;">Average</th>
-      <th style="text-align: right; padding: 15px 20px 15px 10px; font-weight: 700; color: #333;">Diff</th>`;
-
-    tableHead.innerHTML = headHtml;
-    const catKeys = [
-      "Location & Neighbourhood",
-      "Cleanliness",
-      "Room Comfort",
-      "Hotel Amenities & Atmosphere",
-      "Food & Beverage",
-      "Guest Experience & Service",
-      "Value for Money",
-    ];
-
-    tableBody.innerHTML = "";
-
-    catKeys.forEach((cat) => {
-      const subjVal = subject.wtkSummary.categories[cat] || 0;
-
-      let rowHtml = `<tr style="border-bottom: 1px solid #f5f5f5">`;
-      rowHtml += `<td style="padding: 12px 10px; font-weight: 500">${cat}</td>`;
-      rowHtml += `<td style="text-align: center; padding: 12px 10px; background-color: #f8fbff; color: ${subjVal >= 8 ? "#2faa68" : subjVal >= 6 ? "#efb82c" : "#ce4049"}; font-weight: 600;">${subjVal.toFixed(1)}</td>`;
-      let rowSum = 0;
-      let rowCount = 0;
-
-      comps.forEach((c) => {
-        const val = c.wtkSummary.categories[cat] || 0;
-        if (val > 0) {
-          rowSum += val;
-          rowCount++;
-        }
-        const color = val >= 8 ? "#2faa68" : val >= 6 ? "#efb82c" : "#ce4049";
-        rowHtml += `<td style="text-align: center; padding: 12px 10px; color: ${color}">${val > 0 ? val.toFixed(1) : "-"}</td>`;
-      });
-      const rowAvg = rowCount > 0 ? rowSum / rowCount : 0;
-      rowHtml += `<td style="text-align: center; padding: 12px 10px; font-weight: 700; color: #333;">${rowAvg > 0 ? rowAvg.toFixed(1) : "-"}</td>`;
-      let diff = 0;
-      let diffHtml = "-";
-      if (subjVal > 0 && rowAvg > 0) {
-        diff = subjVal - rowAvg;
-        const diffSign = diff > 0 ? "+" : "";
-        const diffColor = diff >= 0 ? "#2faa68" : "#ce4049";
-        diffHtml = `<span style="color: ${diffColor}">${diffSign}${diff.toFixed(1)}</span>`;
-      }
-
-      rowHtml += `<td style="text-align: right; padding: 12px 20px 12px 10px; font-weight: 700;">${diffHtml}</td>`;
-      rowHtml += `</tr>`;
-
-      tableBody.innerHTML += rowHtml;
-    });
-  }
-}
-/* =========================================
-   MODAL LOGIC
-   ========================================= */
-function openUploadModal() {
-  document.getElementById("uploadModal").style.display = "flex";
-}
-
-function closeUploadModal() {
-  document.getElementById("uploadModal").style.display = "none";
-}
-
-// Close if clicked outside
-window.onclick = function (event) {
-  const modal = document.getElementById("uploadModal");
-  if (event.target === modal) {
-    closeUploadModal();
-  }
-};
-function renderDashboardPage(dashData) {
-  if (!dashData) return;
-  window.DASH_DATA = dashData; // Update Global
-
-  const cats = dashData.categories;
-
-  // 1. Overview Donut
-  if (cats) {
-    const dashScore = document.getElementById("dash-score");
-    if (dashScore) dashScore.textContent = cats.score;
-
-    const total = cats.total || 1;
-    const pos = Math.round((cats.positive / total) * 100);
-    const neu = Math.round((cats.neutral / total) * 100);
-    const neg = Math.round((cats.negative / total) * 100);
-
-    const elPos = document.getElementById("dash-pos-lbl");
-    if (elPos) elPos.textContent = pos + "%";
-    const elNeu = document.getElementById("dash-neu-lbl");
-    if (elNeu) elNeu.textContent = neu + "%";
-    const elNeg = document.getElementById("dash-neg-lbl");
-    if (elNeg) elNeg.textContent = neg + "%";
-  }
-
-  // 2. KPI Cards
-  const kpiContainer = document.getElementById("kpi-container");
-  if (kpiContainer && cats.serviceCategories) {
-    kpiContainer.innerHTML = "";
-    cats.serviceCategories.forEach((cat) => {
-      if (cat.title !== "Brand Consistency & Expression") {
-        renderKPICard(cat, "kpi-container");
-      }
-    });
-    // Add Customize Card
-    kpiContainer.innerHTML += `
-        <div class="kpi-card customize-card">
-            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
-              <span style="font-weight: 800; color: #555">Customize KPI</span>
-            </div>
-            <div class="customize-body">
-              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
-            </div>
-        </div>`;
-  }
-
-  // 3. Target vs Performance Table
-  const targetBody = document.getElementById("target-table-body");
-  if (targetBody && cats.serviceCategories) {
-    targetBody.innerHTML = "";
-    cats.serviceCategories.forEach((cat) => {
-      if (cat.title === "Brand Consistency & Expression") return;
-      const diff = (cat.score - 8).toFixed(1);
-      const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
-      const diffSign = diff >= 0 ? "+" : "";
-
-      const metaKey =
-        Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
-      const meta = META[metaKey] || { img: "check.png", short: cat.title };
-
-      targetBody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f5f5f5;">
-                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
-                <td class="val-center">${cat.score}</td>
-                <td class="val-center">8</td>
-                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
-            </tr>`;
-    });
-  }
-
-  // 4. Staff Table
-  const staffBody = document.getElementById("staff-body");
-  if (staffBody && dashData.staffs) {
-    staffBody.innerHTML = "";
-    dashData.staffs.forEach((row) => {
-      const total = row.totalMentions || 0;
-      const pos = row.positive || 0;
-      const neg = row.negative || 0;
-      const posRatio = total > 0 ? (pos / total) * 100 : 0;
-      const negRatio = total > 0 ? (neg / total) * 100 : 0;
-      const ratioDisplay =
-        pos > 0
-          ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
-          : "0%";
-      const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
-          <td class="col-arrow">></td>
-          <td>${row.lastTimeMention || "-"}</td>
-          <td class="center">${total}</td>
-          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
-          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
-          <td class="right">${ratioDisplay}</td>`;
-      staffBody.appendChild(tr);
-    });
   }
 }

@@ -473,7 +473,6 @@ function renderReport(data) {
    4. MAIN INITIALIZATION & DASHBOARD
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initial Load
   Promise.all([
     fetch("data.json").then((r) => r.json()),
     fetch("dashboard.json").then((r) => r.json()),
@@ -484,50 +483,102 @@ document.addEventListener("DOMContentLoaded", () => {
       window.DASH_DATA = dashData;
       window.COMP_DATA = compData;
 
-      renderReport(mainData); // Pages 1, 5-10
-      renderDashboardPage(dashData); // Pages 2-3
-      if (compData) renderCompetitorsPage(compData); // Page 4
+      renderReport(mainData);
+
+      // --- RENDER DASHBOARD ---
+      const cats = dashData.categories;
+
+      if (cats) {
+        const dashScore = document.getElementById("dash-score");
+        if (dashScore) dashScore.textContent = cats.score;
+
+        const total = cats.total || 1;
+        const pos = Math.round((cats.positive / total) * 100);
+        const neu = Math.round((cats.neutral / total) * 100);
+        const neg = Math.round((cats.negative / total) * 100);
+
+        const elPos = document.getElementById("dash-pos-lbl");
+        if (elPos) elPos.textContent = pos + "%";
+        const elNeu = document.getElementById("dash-neu-lbl");
+        if (elNeu) elNeu.textContent = neu + "%";
+        const elNeg = document.getElementById("dash-neg-lbl");
+        if (elNeg) elNeg.textContent = neg + "%";
+      }
+      const kpiContainer = document.getElementById("kpi-container");
+      if (kpiContainer && cats.serviceCategories) {
+        kpiContainer.innerHTML = "";
+        cats.serviceCategories.forEach((cat) => {
+          if (cat.title !== "Brand Consistency & Expression") {
+            renderKPICard(cat, "kpi-container");
+          }
+        });
+        kpiContainer.innerHTML += `
+        <div class="kpi-card customize-card">
+            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
+              <span style="font-weight: 800; color: #555">Customize KPI</span>
+            </div>
+            <div class="customize-body">
+              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
+            </div>
+        </div>`;
+      }
+
+      // 3. Target vs Performance Table
+      const targetBody = document.getElementById("target-table-body");
+      if (targetBody && cats.serviceCategories) {
+        targetBody.innerHTML = "";
+        cats.serviceCategories.forEach((cat) => {
+          if (cat.title === "Brand Consistency & Expression") return;
+          const diff = (cat.score - 8).toFixed(1);
+          const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
+          const diffSign = diff >= 0 ? "+" : "";
+
+          const metaKey =
+            Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
+          const meta = META[metaKey] || { img: "check.png", short: cat.title };
+
+          targetBody.innerHTML += `
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
+                <td class="val-center">${cat.score}</td>
+                <td class="val-center">8</td>
+                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
+            </tr>`;
+        });
+      }
+      if (compData) {
+        renderCompetitorsPage(compData);
+      }
+      // --- RENDER STAFF ---
+      const staffBody = document.getElementById("staff-body");
+      if (staffBody && dashData.staffs) {
+        staffBody.innerHTML = "";
+        dashData.staffs.forEach((row) => {
+          const total = row.totalMentions || 0;
+          const pos = row.positive || 0;
+          const neg = row.negative || 0;
+          const posRatio = total > 0 ? (pos / total) * 100 : 0;
+          const negRatio = total > 0 ? (neg / total) * 100 : 0;
+          const ratioDisplay =
+            pos > 0
+              ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
+              : "0%";
+          const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
+          <td class="col-arrow">></td>
+          <td>${row.lastTimeMention || "-"}</td>
+          <td class="center">${total}</td>
+          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
+          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
+          <td class="right">${ratioDisplay}</td>`;
+          staffBody.appendChild(tr);
+        });
+      }
     })
     .catch((err) => logError("Data Load Failed", err));
-
-  // 2. Helper for File Uploads
-  const setupUpload = (id, callback) => {
-    const input = document.getElementById(id);
-    if (!input) return;
-    input.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        try {
-          const json = JSON.parse(e.target.result);
-          callback(json); // Run the specific render function
-          closeUploadModal();
-          alert("Data updated successfully!");
-        } catch (err) {
-          alert("Invalid JSON file");
-          console.error(err);
-        }
-      };
-      reader.readAsText(file);
-      // Reset input so same file can be selected again
-      e.target.value = "";
-    });
-  };
-
-  // 3. Attach Listeners to the 3 Inputs
-  setupUpload("file-dashboard", (json) => renderDashboardPage(json));
-  setupUpload("file-competitors", (json) =>
-    renderCompetitorsPage({
-      subject: window.COMP_DATA.subject,
-      competitors: json.competitors || json,
-    }),
-  );
-  // Note: For competitors, we assume the JSON structure matches. If uploading full structure, pass directly.
-  // Ideally, user uploads the full 'competitors.json' structure.
-  setupUpload("file-competitors", (json) => renderCompetitorsPage(json));
-
-  setupUpload("file-main", (json) => renderReport(json));
 });
 
 /* =========================================

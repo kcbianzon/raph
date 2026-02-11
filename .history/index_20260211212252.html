@@ -16,7 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
   <body>
-
     <div class="control-bar no-print">
       <div class="control-content">
         <div class="nav-links">
@@ -30,19 +29,22 @@
           <a href="#p11">Contact</a>
         </div>
         <div class="actions">
-        <input type="file" id="file-dashboard" style="display: none" accept=".json" />
-        <input type="file" id="file-competitors" style="display: none" accept=".json" />
-        <input type="file" id="file-main" style="display: none" accept=".json" />
-
-        <button onclick="openUploadModal()">Upload JSON</button>
-        
-        <button onclick="downloadJSON()">Json</button>
-        <button onclick="downloadExcel()">Excel</button>
-        <button onclick="downloadHTML()">Html</button>
-        <button onclick="downloadPDF()" class="btn-primary">
-          Download PDF
-        </button>
-      </div>
+          <input
+            type="file"
+            id="upload-json"
+            style="display: none"
+            accept=".json"
+          />
+          <button onclick="document.getElementById('upload-json').click()">
+            Upload JSON
+          </button>
+          <button onclick="downloadJSON()">Json</button>
+          <button onclick="downloadExcel()">Excel</button>
+          <button onclick="downloadHTML()">Html</button>
+          <button onclick="downloadPDF()" class="btn-primary">
+            Download PDF
+          </button>
+        </div>
       </div>
     </div>
 
@@ -226,6 +228,20 @@
         </div>
         <h3 class="dash-h3">Category KPI</h3>
         <div class="kpi-grid-container" id="kpi-container"></div>
+            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
+              <img
+                src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/UopobwZZFQvaqb5OerBH/media/688900e6c625b8f2be4c1db0.png"
+                class="kpi-q-icon"
+              />
+              <span style="font-weight: 800; color: #555">Customize KPI</span>
+            </div>
+            <div class="customize-body">
+              <img
+                src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg"
+                class="kpi-plus-img"
+              />
+            </div>
+          </div>
         </div>
         <h3 class="dash-h3">Target vs Performance ²</h3>
         <div class="target-perf-wrapper">
@@ -608,52 +624,190 @@
 
         <div class="top-grid">
           <div style="width: 25%">
-            <div class="sub-title" style="border-left: 4px solid #3aa49d; padding-left: 10px">
+            <div
+              class="sub-title"
+              style="border-left: 4px solid #3aa49d; padding-left: 10px"
+            >
               Hotel Standalone Score
             </div>
             <div class="score-circle" style="background: #1f3b32">
               <div class="score-label">Hotel<br />Overall</div>
-              <div class="score-val" id="comp-subject-score">--</div>
+              <div class="score-val">7.3</div>
             </div>
           </div>
 
           <div style="width: 30%; text-align: center">
-            <div class="sub-title" style="border-left: 4px solid #3aa49d; padding-left: 10px">
+            <div
+              class="sub-title"
+              style="border-left: 4px solid #3aa49d; padding-left: 10px"
+            >
               Relative Performance
             </div>
 
-            <div class="gauge-wrapper" style="position: relative; height: 130px; margin-top: 20px">
-              <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 14px; color: #333;">1</div>
+            <div
+              class="gauge-wrapper"
+              style="position: relative; height: 130px; margin-top: 20px"
+            >
+              <div
+                style="
+                  position: absolute;
+                  top: -20px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  font-weight: 700;
+                  font-size: 14px;
+                  color: #333;
+                "
+              >
+                1
+              </div>
 
-              <svg class="gauge-svg" viewBox="0 0 200 110" style="width: 100%; height: 100px; overflow: visible">
-                <path d="M20 100 A 80 80 0 0 1 100 20" fill="none" stroke="#CE4049" stroke-width="25" />
-                <path d="M100 20 A 80 80 0 0 1 180 100" fill="none" stroke="#2FAA68" stroke-width="25" />
+              <svg
+                class="gauge-svg"
+                viewBox="0 0 200 110"
+                style="width: 100%; height: 100px; overflow: visible"
+              >
+                <path
+                  d="M20 100 A 80 80 0 0 1 100 20"
+                  fill="none"
+                  stroke="#CE4049"
+                  stroke-width="25"
+                />
+                <path
+                  d="M100 20 A 80 80 0 0 1 180 100"
+                  fill="none"
+                  stroke="#2FAA68"
+                  stroke-width="25"
+                />
               </svg>
 
-              <div class="needle" id="comp-needle" style="bottom: 35px; left: 50%; transform: translateX(-50%) rotate(0deg); transition: transform 1s ease-out;"></div>
+              <div
+                class="needle"
+                style="
+                  bottom: 35px;
+                  left: 50%;
+                  transform: translateX(-50%) rotate(-18deg);
+                "
+              ></div>
 
-              <div style="display: flex; justify-content: space-between; padding: 0 10px; margin-top: -25px; position: relative; z-index: 5;">
-                <span style="font-weight: 700; color: #333; margin-top: 20px; margin-left: 60px;">0.5</span>
-                <span id="comp-ratio-val" style="font-weight: 700; color: #333; font-size: 18px; margin-top: 20px; margin-right: 5px;">--</span>
-                <span style="font-weight: 700; color: #333; margin-top: 20px; margin-right: 60px;">1.5</span>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 0 10px;
+                  margin-top: -25px;
+                  position: relative;
+                  z-index: 5;
+                "
+              >
+                <span
+                  style="
+                    font-weight: 700;
+                    color: #333;
+                    margin-top: 20px;
+                    margin-left: 60px;
+                  "
+                  >0.5</span
+                >
+                <span
+                  style="
+                    font-weight: 700;
+                    color: #ce4049;
+                    font-size: 18px;
+                    margin-top: 20px;
+                    margin-right: 5px;
+                  "
+                  >0.9</span
+                >
+                <span
+                  style="
+                    font-weight: 700;
+                    color: #333;
+                    margin-top: 20px;
+                    margin-right: 60px;
+                  "
+                  >1.5</span
+                >
               </div>
             </div>
 
-            <div class="gauge-legend" style="display: flex; justify-content: center; gap: 15px; font-size: 10px; margin-top: 20px; color: #555;">
+            <div
+              class="gauge-legend"
+              style="
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                font-size: 10px;
+                margin-top: 20px;
+                color: #555;
+              "
+            >
               <div style="display: flex; align-items: center; gap: 5px">
-                <span style="width: 10px; height: 10px; background: #ce4049; display: inline-block;"></span> Under performance
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    background: #ce4049;
+                    display: inline-block;
+                  "
+                ></span>
+                Under performance
               </div>
               <div style="display: flex; align-items: center; gap: 5px">
-                <span style="width: 10px; height: 10px; background: #2faa68; display: inline-block;"></span> Over performance
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    background: #2faa68;
+                    display: inline-block;
+                  "
+                ></span>
+                Over performance
               </div>
             </div>
           </div>
 
           <div style="width: 45%">
-            <div class="sub-title" style="border-left: 4px solid #3aa49d; padding-left: 10px">
+            <div
+              class="sub-title"
+              style="border-left: 4px solid #3aa49d; padding-left: 10px"
+            >
               Competitor
             </div>
-            <div class="comp-list" id="comp-list-container"></div>
+            <div class="comp-list">
+              <div class="comp-row">
+                <span class="comp-name">Grand Hotel et de Milan -...</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 84%; background: #3b556e">
+                    8.4
+                  </div>
+                </div>
+              </div>
+              <div class="comp-row">
+                <span class="comp-name">Hotel Principe Di Savoia -...</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 83%; background: #917b9f">
+                    8.3
+                  </div>
+                </div>
+              </div>
+              <div class="comp-row">
+                <span class="comp-name">Casa Brera, a Luxury Coll...</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 86%; background: #9fb0c8">
+                    8.6
+                  </div>
+                </div>
+              </div>
+              <div class="comp-row">
+                <span class="comp-name">The Westin Palace, Milan</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 71%; background: #c5a665">
+                    7.1
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1282,14 +1436,491 @@
           </div>
         </div>
 
-        <div class="table-section" style="margin-top: 30px; overflow-x: auto;">
-          <table class="ota-table" style="width: 100%; border-collapse: collapse; font-size: 13px; color: #555;">
+        <div class="table-section" style="margin-top: 30px">
+          <table
+            class="ota-table"
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 13px;
+              color: #555;
+            "
+          >
             <thead>
-              <tr id="comp-table-head" style="border-bottom: 1px solid #eee">
-                </tr>
+              <tr style="border-bottom: 1px solid #eee">
+                <th
+                  style="
+                    text-align: left;
+                    padding: 15px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  Category
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 600;
+                    background-color: #f8fbff;
+                    border-bottom: 2px solid #3aa49d;
+                  "
+                >
+                  Excelsior Hotel Gallia, a Luxur...
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 600;
+                  "
+                >
+                  Grand Hotel Et De Milan...
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 600;
+                  "
+                >
+                  Hotel Principe Di Savoia -...
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 600;
+                  "
+                >
+                  Casa Brera, A Luxury Coll...
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 600;
+                  "
+                >
+                  The Westin Palace, Milan
+                </th>
+                <th
+                  style="
+                    text-align: center;
+                    padding: 15px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  Average
+                </th>
+                <th
+                  style="
+                    text-align: right;
+                    padding: 15px 20px 15px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  Diff
+                </th>
+              </tr>
             </thead>
-            <tbody id="comp-table-body">
-                </tbody>
+            <tbody>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Location & Neighbourhood
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #2faa68;
+                    font-weight: 600;
+                  "
+                >
+                  8.6
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.7
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.6
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.7
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #ce4049;
+                  "
+                >
+                  -0.1
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Cleanliness
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #2faa68;
+                    font-weight: 600;
+                  "
+                >
+                  8.1
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  9.2
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  5.6
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.1
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  -
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Room Comfort
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #efb82c;
+                    font-weight: 600;
+                  "
+                >
+                  7.4
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.5
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.9
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.9
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  6.5
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.2
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #ce4049;
+                  "
+                >
+                  -0.8
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Hotel Amenities & Atmosphere
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #2faa68;
+                    font-weight: 600;
+                  "
+                >
+                  8.4
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.9
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.3
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.1
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.5
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #ce4049;
+                  "
+                >
+                  -0.1
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Food & Beverage
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #efb82c;
+                    font-weight: 600;
+                  "
+                >
+                  6.0
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.9
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.3
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  9.0
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.3
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.6
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #ce4049;
+                  "
+                >
+                  -2.6
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Guest Experience & Service
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #efb82c;
+                    font-weight: 600;
+                  "
+                >
+                  6.9
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.3
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.2
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #2faa68"
+                >
+                  8.7
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  6.7
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  8.0
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #ce4049;
+                  "
+                >
+                  -1.1
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f5f5f5">
+                <td style="padding: 12px 10px; font-weight: 500">
+                  Value for Money
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    background-color: #f8fbff;
+                    color: #ce4049;
+                    font-weight: 600;
+                  "
+                >
+                  5.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #ce4049"
+                >
+                  3.0
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  5.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  7.8
+                </td>
+                <td
+                  style="text-align: center; padding: 12px 10px; color: #efb82c"
+                >
+                  5.0
+                </td>
+                <td
+                  style="
+                    text-align: center;
+                    padding: 12px 10px;
+                    font-weight: 700;
+                    color: #333;
+                  "
+                >
+                  5.4
+                </td>
+                <td
+                  style="
+                    text-align: right;
+                    padding: 12px 20px 12px 10px;
+                    font-weight: 700;
+                    color: #2faa68;
+                  "
+                >
+                  +0.4
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
 
@@ -1892,44 +2523,7 @@
         <div class="contact-hero"></div>
       </section>
     </main>
-    <div id="uploadModal" class="modal-overlay" style="display: none;">
-      <div class="modal-box">
-        <div class="modal-header">
-          <h3>Select Data to Update</h3>
-          <button class="close-btn" onclick="closeUploadModal()">×</button>
-        </div>
-        <div class="modal-body">
-          <p>Please select which section of the report you want to update:</p>
-          
-          <div class="upload-options">
-            <div class="up-opt" onclick="document.getElementById('file-dashboard').click()">
-              <img src="assets/icon.png" class="opt-icon-img" alt="Dashboard" />
-              <div class="opt-info">
-                <strong>Dashboard & Staff</strong>
-                <span>Pages 2 & 3</span>
-              </div>
-            </div>
 
-            <div class="up-opt" onclick="document.getElementById('file-competitors').click()">
-              <img src="assets/trend.png" class="opt-icon-img" alt="Competitors" />
-              <div class="opt-info">
-                <strong>Competitors</strong>
-                <span>Page 4</span>
-              </div>
-            </div>
-
-            <div class="up-opt" onclick="document.getElementById('file-main').click()">
-              <img src="assets/check.png" class="opt-icon-img" alt="Solutions" />
-              <div class="opt-info">
-                <strong>Monthly & Solutions</strong>
-                <span>Pages 5 - 10</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     <script src="script.js"></script>
-    
   </body>
 </html>

@@ -49,6 +49,8 @@ function getRing(pct, colorClass) {
         stroke="${stroke}" stroke-dasharray="${dash} 62.8" style="opacity:${opacity}"></circle>
     </svg>`;
 }
+
+// FIX: Added 'img' for icons and 'short' for KPI labels
 const META = {
   "Location & Neighbourhood": {
     code: "loc",
@@ -120,27 +122,44 @@ const META = {
    ========================================= */
 
 function renderKPICard(cat, containerId) {
+  // 1. Calculate Percentages
   const total = cat.total || 1;
   const posPct = Math.round((cat.positive / total) * 100);
   const negPct = Math.round((cat.negative / total) * 100);
   const neuPct = Math.round((cat.neutral / total) * 100);
+
+  // 2. Metadata Lookup
   const metaKey =
     Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
   const meta = META[metaKey] || {
     img: "check.png",
     short: cat.title.split(" ")[0],
   };
+
+  // 3. Dash Arrays for SVG
   const greenDash = `${posPct}, 100`;
   const yellowDash = `${neuPct}, 100`;
   const yellowOffset = -posPct;
   const redDash = `${negPct}, 100`;
   const redOffset = -(posPct + neuPct);
+
+  // 4. Helper to Calculate Label Position (Math Magic)
+  // offsetPct: where the arc starts (e.g., Green starts at 0, Yellow at posPct)
+  // valPct: how big the arc is
   const getPos = (offsetPct, valPct) => {
-    if (valPct <= 0) return null;
+    if (valPct <= 0) return null; // Don't show label if 0%
+
+    // Find middle of the arc
     const midPct = offsetPct + valPct / 2;
+
+    // Convert percent to degrees (3.6 deg per 1%). Subtract 90 to start at 12 o'clock.
     const angleDeg = midPct * 3.6 - 90;
     const angleRad = angleDeg * (Math.PI / 180);
+
+    // Distance from center (50% is edge of box, we go 68% to be outside ring)
     const radius = 68;
+
+    // Calculate Top/Left percentages
     const left = 50 + radius * Math.cos(angleRad);
     const top = 50 + radius * Math.sin(angleRad);
 
@@ -148,8 +167,11 @@ function renderKPICard(cat, containerId) {
   };
 
   const posStyle = getPos(0, posPct);
-  const neuStyle = getPos(posPct, neuPct);
-  const negStyle = getPos(posPct + neuPct, negPct);
+  const neuStyle = getPos(posPct, neuPct); // Neutral follows Positive
+  const negStyle = getPos(posPct + neuPct, negPct); // Negative follows Neutral
+
+  // 5. Generate HTML
+  // Note: We use transform: translate(-50%, -50%) to center the text exactly on the point
   const html = `
     <div class="kpi-card">
       <div class="kpi-head">
@@ -473,61 +495,112 @@ function renderReport(data) {
    4. MAIN INITIALIZATION & DASHBOARD
    ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initial Load
   Promise.all([
     fetch("data.json").then((r) => r.json()),
     fetch("dashboard.json").then((r) => r.json()),
-    fetch("competitors.json").then((r) => r.json()),
   ])
-    .then(([mainData, dashData, compData]) => {
+    .then(([mainData, dashData]) => {
       window.REPORT_DATA = mainData;
       window.DASH_DATA = dashData;
-      window.COMP_DATA = compData;
 
-      renderReport(mainData); // Pages 1, 5-10
-      renderDashboardPage(dashData); // Pages 2-3
-      if (compData) renderCompetitorsPage(compData); // Page 4
+      renderReport(mainData);
+
+      // --- RENDER DASHBOARD (PAGE 2) ---
+      const cats = dashData.categories;
+
+      // 1. Overview Donut
+      if (cats) {
+        const dashScore = document.getElementById("dash-score");
+        if (dashScore) dashScore.textContent = cats.score;
+
+        const total = cats.total || 1;
+        const pos = Math.round((cats.positive / total) * 100);
+        const neu = Math.round((cats.neutral / total) * 100);
+        const neg = Math.round((cats.negative / total) * 100);
+
+        const elPos = document.getElementById("dash-pos-lbl");
+        if (elPos) elPos.textContent = pos + "%";
+        const elNeu = document.getElementById("dash-neu-lbl");
+        if (elNeu) elNeu.textContent = neu + "%";
+        const elNeg = document.getElementById("dash-neg-lbl");
+        if (elNeg) elNeg.textContent = neg + "%";
+      }
+
+      // 2. KPI Cards
+      const kpiContainer = document.getElementById("kpi-container");
+      if (kpiContainer && cats.serviceCategories) {
+        kpiContainer.innerHTML = "";
+        cats.serviceCategories.forEach((cat) => {
+          if (cat.title !== "Brand Consistency & Expression") {
+            renderKPICard(cat, "kpi-container");
+          }
+        });
+        // Add Customize Card
+        kpiContainer.innerHTML += `
+        <div class="kpi-card customize-card">
+            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
+              <span style="font-weight: 800; color: #555">Customize KPI</span>
+            </div>
+            <div class="customize-body">
+              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
+            </div>
+        </div>`;
+      }
+
+      // 3. Target vs Performance Table
+      const targetBody = document.getElementById("target-table-body");
+      if (targetBody && cats.serviceCategories) {
+        targetBody.innerHTML = "";
+        cats.serviceCategories.forEach((cat) => {
+          if (cat.title === "Brand Consistency & Expression") return;
+          const diff = (cat.score - 8).toFixed(1);
+          const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
+          const diffSign = diff >= 0 ? "+" : "";
+
+          const metaKey =
+            Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
+          const meta = META[metaKey] || { img: "check.png", short: cat.title };
+
+          targetBody.innerHTML += `
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
+                <td class="val-center">${cat.score}</td>
+                <td class="val-center">8</td>
+                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
+            </tr>`;
+        });
+      }
+
+      // --- RENDER STAFF (PAGE 3) ---
+      const staffBody = document.getElementById("staff-body");
+      if (staffBody && dashData.staffs) {
+        staffBody.innerHTML = "";
+        dashData.staffs.forEach((row) => {
+          const total = row.totalMentions || 0;
+          const pos = row.positive || 0;
+          const neg = row.negative || 0;
+          const posRatio = total > 0 ? (pos / total) * 100 : 0;
+          const negRatio = total > 0 ? (neg / total) * 100 : 0;
+          const ratioDisplay =
+            pos > 0
+              ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
+              : "0%";
+          const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
+          <td class="col-arrow">></td>
+          <td>${row.lastTimeMention || "-"}</td>
+          <td class="center">${total}</td>
+          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
+          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
+          <td class="right">${ratioDisplay}</td>`;
+          staffBody.appendChild(tr);
+        });
+      }
     })
     .catch((err) => logError("Data Load Failed", err));
-
-  // 2. Helper for File Uploads
-  const setupUpload = (id, callback) => {
-    const input = document.getElementById(id);
-    if (!input) return;
-    input.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        try {
-          const json = JSON.parse(e.target.result);
-          callback(json); // Run the specific render function
-          closeUploadModal();
-          alert("Data updated successfully!");
-        } catch (err) {
-          alert("Invalid JSON file");
-          console.error(err);
-        }
-      };
-      reader.readAsText(file);
-      // Reset input so same file can be selected again
-      e.target.value = "";
-    });
-  };
-
-  // 3. Attach Listeners to the 3 Inputs
-  setupUpload("file-dashboard", (json) => renderDashboardPage(json));
-  setupUpload("file-competitors", (json) =>
-    renderCompetitorsPage({
-      subject: window.COMP_DATA.subject,
-      competitors: json.competitors || json,
-    }),
-  );
-  // Note: For competitors, we assume the JSON structure matches. If uploading full structure, pass directly.
-  // Ideally, user uploads the full 'competitors.json' structure.
-  setupUpload("file-competitors", (json) => renderCompetitorsPage(json));
-
-  setupUpload("file-main", (json) => renderReport(json));
 });
 
 /* =========================================
@@ -610,237 +683,5 @@ async function downloadPDF() {
     btn.innerText = originalText;
     btn.style.opacity = "1";
     btn.disabled = false;
-  }
-}
-function renderCompetitorsPage(data) {
-  const subject = data.subject;
-  const comps = data.competitors;
-  const subjScore = subject.wtkSummary.overall_score_avg || 0;
-  document.getElementById("comp-subject-score").textContent =
-    subjScore.toFixed(1);
-  let compSum = 0;
-  let compCount = 0;
-  comps.forEach((c) => {
-    if (c.wtkSummary.overall_score_avg) {
-      compSum += c.wtkSummary.overall_score_avg;
-      compCount++;
-    }
-  });
-  const compAvg = compCount > 0 ? compSum / compCount : 1;
-  const ratio = compAvg > 0 ? subjScore / compAvg : 1;
-  const ratioDisplay = ratio.toFixed(2);
-  let rotation = (ratio - 1) * 180;
-  if (rotation < -90) rotation = -90;
-  if (rotation > 90) rotation = 90;
-
-  const needle = document.getElementById("comp-needle");
-  const ratioText = document.getElementById("comp-ratio-val");
-
-  if (needle)
-    needle.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-  if (ratioText) {
-    ratioText.textContent = ratioDisplay;
-    ratioText.style.color = ratio >= 1 ? "#2FAA68" : "#CE4049";
-  }
-  const listContainer = document.getElementById("comp-list-container");
-  if (listContainer) {
-    listContainer.innerHTML = "";
-    comps.forEach((c, index) => {
-      const score = c.wtkSummary.overall_score_avg || 0;
-      const colors = ["#3b556e", "#917b9f", "#9fb0c8", "#c5a665", "#7a62ae"];
-      const barColor = colors[index % colors.length];
-      const widthPct = (score / 10) * 100;
-
-      const html = `
-          <div class="comp-row">
-            <span class="comp-name" title="${c.basicInfo.hotelName}">${c.basicInfo.hotelName}</span>
-            <div class="bar-container">
-              <div class="bar-fill" style="width: ${widthPct}%; background: ${barColor}">
-                ${score.toFixed(1)}
-              </div>
-            </div>
-          </div>`;
-      listContainer.innerHTML += html;
-    });
-  }
-  const tableHead = document.getElementById("comp-table-head");
-  const tableBody = document.getElementById("comp-table-body");
-
-  if (tableHead && tableBody) {
-    let headHtml = `<th style="text-align: left; padding: 15px 10px; font-weight: 700; color: #333;">Category</th>`;
-    headHtml += `
-      <th style="text-align: center; padding: 15px 10px; font-weight: 600; background-color: #f8fbff; border-bottom: 2px solid #3aa49d;">
-        ${subject.basicInfo.hotelName.substring(0, 15)}...
-      </th>`;
-    comps.forEach((c) => {
-      headHtml += `<th style="text-align: center; padding: 15px 10px; font-weight: 600;">${c.basicInfo.hotelName.substring(0, 15)}...</th>`;
-    });
-    headHtml += `
-      <th style="text-align: center; padding: 15px 10px; font-weight: 700; color: #333;">Average</th>
-      <th style="text-align: right; padding: 15px 20px 15px 10px; font-weight: 700; color: #333;">Diff</th>`;
-
-    tableHead.innerHTML = headHtml;
-    const catKeys = [
-      "Location & Neighbourhood",
-      "Cleanliness",
-      "Room Comfort",
-      "Hotel Amenities & Atmosphere",
-      "Food & Beverage",
-      "Guest Experience & Service",
-      "Value for Money",
-    ];
-
-    tableBody.innerHTML = "";
-
-    catKeys.forEach((cat) => {
-      const subjVal = subject.wtkSummary.categories[cat] || 0;
-
-      let rowHtml = `<tr style="border-bottom: 1px solid #f5f5f5">`;
-      rowHtml += `<td style="padding: 12px 10px; font-weight: 500">${cat}</td>`;
-      rowHtml += `<td style="text-align: center; padding: 12px 10px; background-color: #f8fbff; color: ${subjVal >= 8 ? "#2faa68" : subjVal >= 6 ? "#efb82c" : "#ce4049"}; font-weight: 600;">${subjVal.toFixed(1)}</td>`;
-      let rowSum = 0;
-      let rowCount = 0;
-
-      comps.forEach((c) => {
-        const val = c.wtkSummary.categories[cat] || 0;
-        if (val > 0) {
-          rowSum += val;
-          rowCount++;
-        }
-        const color = val >= 8 ? "#2faa68" : val >= 6 ? "#efb82c" : "#ce4049";
-        rowHtml += `<td style="text-align: center; padding: 12px 10px; color: ${color}">${val > 0 ? val.toFixed(1) : "-"}</td>`;
-      });
-      const rowAvg = rowCount > 0 ? rowSum / rowCount : 0;
-      rowHtml += `<td style="text-align: center; padding: 12px 10px; font-weight: 700; color: #333;">${rowAvg > 0 ? rowAvg.toFixed(1) : "-"}</td>`;
-      let diff = 0;
-      let diffHtml = "-";
-      if (subjVal > 0 && rowAvg > 0) {
-        diff = subjVal - rowAvg;
-        const diffSign = diff > 0 ? "+" : "";
-        const diffColor = diff >= 0 ? "#2faa68" : "#ce4049";
-        diffHtml = `<span style="color: ${diffColor}">${diffSign}${diff.toFixed(1)}</span>`;
-      }
-
-      rowHtml += `<td style="text-align: right; padding: 12px 20px 12px 10px; font-weight: 700;">${diffHtml}</td>`;
-      rowHtml += `</tr>`;
-
-      tableBody.innerHTML += rowHtml;
-    });
-  }
-}
-/* =========================================
-   MODAL LOGIC
-   ========================================= */
-function openUploadModal() {
-  document.getElementById("uploadModal").style.display = "flex";
-}
-
-function closeUploadModal() {
-  document.getElementById("uploadModal").style.display = "none";
-}
-
-// Close if clicked outside
-window.onclick = function (event) {
-  const modal = document.getElementById("uploadModal");
-  if (event.target === modal) {
-    closeUploadModal();
-  }
-};
-function renderDashboardPage(dashData) {
-  if (!dashData) return;
-  window.DASH_DATA = dashData; // Update Global
-
-  const cats = dashData.categories;
-
-  // 1. Overview Donut
-  if (cats) {
-    const dashScore = document.getElementById("dash-score");
-    if (dashScore) dashScore.textContent = cats.score;
-
-    const total = cats.total || 1;
-    const pos = Math.round((cats.positive / total) * 100);
-    const neu = Math.round((cats.neutral / total) * 100);
-    const neg = Math.round((cats.negative / total) * 100);
-
-    const elPos = document.getElementById("dash-pos-lbl");
-    if (elPos) elPos.textContent = pos + "%";
-    const elNeu = document.getElementById("dash-neu-lbl");
-    if (elNeu) elNeu.textContent = neu + "%";
-    const elNeg = document.getElementById("dash-neg-lbl");
-    if (elNeg) elNeg.textContent = neg + "%";
-  }
-
-  // 2. KPI Cards
-  const kpiContainer = document.getElementById("kpi-container");
-  if (kpiContainer && cats.serviceCategories) {
-    kpiContainer.innerHTML = "";
-    cats.serviceCategories.forEach((cat) => {
-      if (cat.title !== "Brand Consistency & Expression") {
-        renderKPICard(cat, "kpi-container");
-      }
-    });
-    // Add Customize Card
-    kpiContainer.innerHTML += `
-        <div class="kpi-card customize-card">
-            <div class="kpi-head" style="justify-content: flex-start; gap: 8px">
-              <span style="font-weight: 800; color: #555">Customize KPI</span>
-            </div>
-            <div class="customize-body">
-              <img src="https://static.vecteezy.com/system/resources/previews/020/213/750/large_2x/add-button-plus-icon-isolated-on-circle-line-background-vector.jpg" class="kpi-plus-img" />
-            </div>
-        </div>`;
-  }
-
-  // 3. Target vs Performance Table
-  const targetBody = document.getElementById("target-table-body");
-  if (targetBody && cats.serviceCategories) {
-    targetBody.innerHTML = "";
-    cats.serviceCategories.forEach((cat) => {
-      if (cat.title === "Brand Consistency & Expression") return;
-      const diff = (cat.score - 8).toFixed(1);
-      const diffColor = diff >= 0 ? "#2FAA68" : "#CE4049";
-      const diffSign = diff >= 0 ? "+" : "";
-
-      const metaKey =
-        Object.keys(META).find((k) => k.includes(cat.title)) || cat.title;
-      const meta = META[metaKey] || { img: "check.png", short: cat.title };
-
-      targetBody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f5f5f5;">
-                <td><img src="assets/${meta.img}" class="tiny-icon" /> ${cat.title}</td>
-                <td class="val-center">${cat.score}</td>
-                <td class="val-center">8</td>
-                <td class="diff-val" style="color: ${diffColor}; text-align: right; font-weight: 800;">${diffSign}${diff}</td>
-            </tr>`;
-    });
-  }
-
-  // 4. Staff Table
-  const staffBody = document.getElementById("staff-body");
-  if (staffBody && dashData.staffs) {
-    staffBody.innerHTML = "";
-    dashData.staffs.forEach((row) => {
-      const total = row.totalMentions || 0;
-      const pos = row.positive || 0;
-      const neg = row.negative || 0;
-      const posRatio = total > 0 ? (pos / total) * 100 : 0;
-      const negRatio = total > 0 ? (neg / total) * 100 : 0;
-      const ratioDisplay =
-        pos > 0
-          ? (posRatio % 1 === 0 ? posRatio : posRatio.toFixed(1)) + "%"
-          : "0%";
-      const initial = row.name ? row.name.charAt(0).toUpperCase() : "-";
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-          <td><div class="col-name"><div class="avatar">${initial}</div>${row.name}</div></td>
-          <td class="col-arrow">></td>
-          <td>${row.lastTimeMention || "-"}</td>
-          <td class="center">${total}</td>
-          <td class="right"><div class="ring-wrapper">${pos > 0 ? pos + "/" + total : "-"}${getRing(posRatio, "green")}</div></td>
-          <td class="right"><div class="ring-wrapper">${neg > 0 ? neg + "/" + total : "-"}${getRing(negRatio, "red")}</div></td>
-          <td class="right">${ratioDisplay}</td>`;
-      staffBody.appendChild(tr);
-    });
   }
 }
