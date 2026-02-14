@@ -178,6 +178,109 @@ function renderKPICard(cat, containerId) {
 
   document.getElementById(containerId).innerHTML += html;
 }
+function renderRadarChart(categories, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container || !categories) return;
+
+  const axes = [
+    "Location & Neighbourhood",
+    "Cleanliness",
+    "Room Comfort",
+    "Hotel Amenities & Atmosphere",
+    "Food & Beverage",
+    "Guest Experience & Service",
+    "Value for Money",
+  ];
+
+  // Restored original large dimensions
+  const centerX = 250;
+  const centerY = 200;
+  const maxRadius = 150;
+
+  const getCoords = (score, angleDeg) => {
+    const angleRad = (angleDeg - 90) * (Math.PI / 180);
+    const r = (score / 10) * maxRadius;
+    return {
+      x: centerX + r * Math.cos(angleRad),
+      y: centerY + r * Math.sin(angleRad),
+    };
+  };
+
+  let pointsScore = [],
+    pointsGoal = [],
+    axesHtml = "",
+    labelsHtml = "";
+
+  axes.forEach((axisName, i) => {
+    const angle = (360 / 7) * i;
+
+    // Goal & Score Math
+    const goalPt = getCoords(8, angle);
+    pointsGoal.push(`${goalPt.x},${goalPt.y}`);
+
+    const catData = categories.find((c) => c.title === axisName);
+    const score = catData ? catData.score : 0;
+    const scorePt = getCoords(score, angle);
+    pointsScore.push(`${scorePt.x},${scorePt.y}`);
+
+    // Axis Grid Lines
+    const maxPt = getCoords(10, angle);
+    axesHtml += `<line x1="${centerX}" y1="${centerY}" x2="${maxPt.x}" y2="${maxPt.y}" stroke="#e5e5e5" stroke-width="1.2" />`;
+
+    // Calculate Label Positions (Push outside the grid)
+    const labelRadius = maxRadius + 35;
+    const labelRad = (angle - 90) * (Math.PI / 180);
+    const labelX = centerX + labelRadius * Math.cos(labelRad);
+    const labelY = centerY + labelRadius * Math.sin(labelRad);
+
+    let anchor = "middle";
+    if (Math.cos(labelRad) > 0.1) anchor = "start";
+    if (Math.cos(labelRad) < -0.1) anchor = "end";
+
+    // Handle long text wrapping exactly like the original design
+    if (axisName === "Hotel Amenities & Atmosphere") {
+      labelsHtml += `<text x="${labelX}" y="${labelY}" text-anchor="${anchor}" font-family="Inter, sans-serif" font-size="13" fill="#444" font-weight="700">
+            <tspan x="${labelX}" dy="-8">Hotel Amenities</tspan>
+            <tspan x="${labelX}" dy="16">&amp; Atmosphere</tspan>
+        </text>`;
+    } else if (axisName === "Guest Experience & Service") {
+      labelsHtml += `<text x="${labelX}" y="${labelY}" text-anchor="${anchor}" font-family="Inter, sans-serif" font-size="13" fill="#444" font-weight="700">
+            <tspan x="${labelX}" dy="-8">Guest Experience</tspan>
+            <tspan x="${labelX}" dy="16">&amp; Service</tspan>
+        </text>`;
+    } else {
+      labelsHtml += `<text x="${labelX}" y="${labelY}" text-anchor="${anchor}" alignment-baseline="middle" font-family="Inter, sans-serif" font-size="13" fill="#444" font-weight="700">${axisName}</text>`;
+    }
+  });
+
+  // Concentric Web Rings (Scores 2, 4, 6, 8, 10)
+  let webHtml = "";
+  [2, 4, 6, 8, 10].forEach((val) => {
+    let pts = axes
+      .map(
+        (_, i) =>
+          `${getCoords(val, (360 / 7) * i).x},${getCoords(val, (360 / 7) * i).y}`,
+      )
+      .join(" ");
+    webHtml += `<polygon points="${pts}" fill="none" stroke="#e5e5e5" stroke-width="1.2" />`;
+  });
+
+  // Render the fully sized SVG
+  // Render the fully sized SVG
+  container.innerHTML = `
+    <svg viewBox="-50 0 600 450" width="100%" style="overflow: visible;">
+        ${webHtml}
+        ${axesHtml}
+        
+        <polygon points="${pointsGoal.join(" ")}" fill="rgba(111, 168, 220, 0.1)" stroke="#6fa8dc" stroke-width="2.5" />
+        ${pointsGoal.map((p) => `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="2.5" fill="#6fa8dc" />`).join("")}
+        
+        <polygon points="${pointsScore.join(" ")}" fill="rgba(142, 124, 195, 0.15)" stroke="#8e7cc3" stroke-width="2.5" stroke-linejoin="round" />
+        ${pointsScore.map((p) => `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="2.5" fill="#8e7cc3" />`).join("")}
+        
+        ${labelsHtml}
+    </svg>`;
+}
 
 function renderCategoryPage7(catData, weeklyData, countData, containerId) {
   const container = document.getElementById(containerId);
@@ -537,22 +640,166 @@ function downloadJSON() {
 }
 
 function downloadExcel() {
-  if (!window.REPORT_DATA) return alert("No data loaded");
-  const data = window.REPORT_DATA;
+  if (typeof XLSX === "undefined") {
+    return alert(
+      "Error: Excel library (SheetJS) is missing. Please check your HTML script tags.",
+    );
+  }
+
+  // Use global data populated from uploads/initial load
+  const repData = window.REPORT_DATA || {};
+  const dashData = window.DASH_DATA || {};
+  const compData = window.COMP_DATA || null;
+
+  if (!repData && !dashData) {
+    return alert("No data loaded to export!");
+  }
+
   const wb = XLSX.utils.book_new();
-  const overviewData = [
-    ["Hotel Name", data.hotel_name || ""],
-    ["Period", data.period_label || ""],
-    ["Total Reviews", data.data_overview?.total_reviews || 0],
+
+  // ==========================================
+  // SHEET 1: Overview
+  // ==========================================
+  const hotelName =
+    repData.data_overview?.hotel_name || dashData.hotelName || "Hotel";
+  const period =
+    repData.period_label ||
+    dashData.categories?.startDate + " to " + dashData.categories?.endDate ||
+    "N/A";
+  const totalReviews =
+    repData.data_overview?.total_reviews || dashData.categories?.total || 0;
+
+  const sentPos =
+    repData.sentiment_summary?.positive || dashData.categories?.positive || 0;
+  const sentNeu =
+    repData.sentiment_summary?.neutral || dashData.categories?.neutral || 0;
+  const sentNeg =
+    repData.sentiment_summary?.negative || dashData.categories?.negative || 0;
+
+  const overviewSheet = [
+    ["Report Data Overview"],
+    ["Hotel Name", hotelName],
+    ["Period", period],
+    ["Total Reviews", totalReviews],
     [],
     ["Sentiment", "Count"],
-    ["Positive", data.sentiment_summary?.positive || 0],
-    ["Neutral", data.sentiment_summary?.neutral || 0],
-    ["Negative", data.sentiment_summary?.negative || 0],
+    ["Positive", sentPos],
+    ["Neutral", sentNeu],
+    ["Negative", sentNeg],
   ];
-  const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
-  XLSX.utils.book_append_sheet(wb, wsOverview, "Overview");
-  XLSX.writeFile(wb, "hotel-report-data.xlsx");
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet(overviewSheet),
+    "Overview",
+  );
+
+  // ==========================================
+  // SHEET 2: Category KPI (From Dashboard)
+  // ==========================================
+  if (dashData.categories && dashData.categories.serviceCategories) {
+    const catSheet = [
+      [
+        "Category",
+        "Score",
+        "Total Mentions",
+        "Positive",
+        "Neutral",
+        "Negative",
+      ],
+    ];
+    dashData.categories.serviceCategories.forEach((cat) => {
+      catSheet.push([
+        cat.title,
+        cat.score,
+        cat.total,
+        cat.positive,
+        cat.neutral,
+        cat.negative,
+      ]);
+    });
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet(catSheet),
+      "Category KPI",
+    );
+  }
+
+  // ==========================================
+  // SHEET 3: Competitors
+  // ==========================================
+  if (compData) {
+    const comps = compData.competitors || [];
+    const subject = compData.subject;
+
+    if (subject) {
+      const compSheet = [
+        [
+          "Hotel Name",
+          "Type",
+          "Overall Score",
+          "Cleanliness",
+          "Room Comfort",
+          "Food & Beverage",
+          "Value for Money",
+          "Location",
+          "Amenities",
+          "Service",
+        ],
+      ];
+
+      const getRow = (hotel, type) => {
+        const wtk = hotel.wtkSummary || {};
+        const cats = wtk.categories || {};
+        return [
+          hotel.basicInfo?.hotelName || "Unknown",
+          type,
+          wtk.overall_score_avg || 0,
+          cats["Cleanliness"] || 0,
+          cats["Room Comfort"] || 0,
+          cats["Food & Beverage"] || 0,
+          cats["Value for Money"] || 0,
+          cats["Location & Neighbourhood"] || 0,
+          cats["Hotel Amenities & Atmosphere"] || 0,
+          cats["Guest Experience & Service"] || 0,
+        ];
+      };
+
+      compSheet.push(getRow(subject, "Subject Hotel"));
+      comps.forEach((c) => compSheet.push(getRow(c, "Competitor")));
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(compSheet),
+        "Competitors",
+      );
+    }
+  }
+
+  // ==========================================
+  // SHEET 4: Staff Mentions
+  // ==========================================
+  if (dashData.staffs) {
+    const staffSheet = [
+      ["Staff Name", "Total Mentions", "Positive", "Negative", "Last Mention"],
+    ];
+    dashData.staffs.forEach((s) => {
+      staffSheet.push([
+        s.name,
+        s.totalMentions,
+        s.positive,
+        s.negative,
+        s.lastTimeMention,
+      ]);
+    });
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet(staffSheet),
+      "Staff Mentions",
+    );
+  }
+
+  // Save the file
+  XLSX.writeFile(wb, "hotel-insights-report.xlsx");
 }
 
 function downloadHTML() {
@@ -633,27 +880,32 @@ function renderCompetitorsPage(data) {
     ratioText.textContent = ratioDisplay;
     ratioText.style.color = ratio >= 1 ? "#2FAA68" : "#CE4049";
   }
+
   const listContainer = document.getElementById("comp-list-container");
   if (listContainer) {
     listContainer.innerHTML = "";
+
     comps.forEach((c, index) => {
       const score = c.wtkSummary.overall_score_avg || 0;
       const colors = ["#3b556e", "#917b9f", "#9fb0c8", "#c5a665", "#7a62ae"];
       const barColor = colors[index % colors.length];
       const widthPct = (score / 10) * 100;
 
+      // FIX: Added flexbox to the row, and ellipsis/max-width to the text span
       const html = `
-          <div class="comp-row">
-            <span class="comp-name" title="${c.basicInfo.hotelName}">${c.basicInfo.hotelName}</span>
-            <div class="bar-container">
-              <div class="bar-fill" style="width: ${widthPct}%; background: ${barColor}">
+          <div class="comp-row" style="display: flex; align-items: center; margin-bottom: 12px;">
+            <span class="comp-name" title="${c.basicInfo.hotelName}" 
+                  style="flex: 0 0 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 15px; color: #555; font-size: 13px;">
+              ${c.basicInfo.hotelName}
+            </span>
+            <div class="bar-container" style="flex: 1; background: #f5f5f5; border-radius: 3px; height: 26px;">
+              <div class="bar-fill" style="width: ${widthPct}%; background: ${barColor}; height: 100%; border-radius: 3px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: #fff; font-weight: 700; font-size: 12px;">
                 ${score.toFixed(1)}
               </div>
             </div>
           </div>`;
       listContainer.innerHTML += html;
     });
-    renderComboChart(subject, comps);
   }
   const tableHead = document.getElementById("comp-table-head");
   const tableBody = document.getElementById("comp-table-body");
@@ -719,6 +971,7 @@ function renderCompetitorsPage(data) {
       tableBody.innerHTML += rowHtml;
     });
   }
+  renderComboChart(subject, comps);
 }
 /* =========================================
    MODAL LOGIC
@@ -741,6 +994,8 @@ function renderDashboardPage(dashData) {
   window.DASH_DATA = dashData;
 
   const cats = dashData.categories;
+
+  // 1. Overview Donut (Dynamic Animation)
   if (cats) {
     const dashScore = document.getElementById("dash-score");
     if (dashScore) dashScore.textContent = cats.score;
@@ -756,8 +1011,44 @@ function renderDashboardPage(dashData) {
     if (elNeu) elNeu.textContent = neu + "%";
     const elNeg = document.getElementById("dash-neg-lbl");
     if (elNeg) elNeg.textContent = neg + "%";
+
+    // Calculate SVG stroke lengths
+    const totalCircumference = 691.15; // 2 * PI * r (110)
+    const semiCircumference = totalCircumference / 2; // Half circle
+
+    const greenLen = (pos / 100) * semiCircumference;
+    const yellowLen = (neu / 100) * semiCircumference;
+    const redLen = (neg / 100) * semiCircumference;
+
+    const donutGreen = document.getElementById("donut-green");
+    const donutYellow = document.getElementById("donut-yellow");
+    const donutRed = document.getElementById("donut-red");
+
+    // Apply the math to the circles
+    if (donutGreen) {
+      donutGreen.setAttribute(
+        "stroke-dasharray",
+        `${greenLen} ${totalCircumference}`,
+      );
+      donutGreen.setAttribute("stroke-dashoffset", `0`);
+    }
+    if (donutYellow) {
+      donutYellow.setAttribute(
+        "stroke-dasharray",
+        `${yellowLen} ${totalCircumference}`,
+      );
+      donutYellow.setAttribute("stroke-dashoffset", `-${greenLen}`);
+    }
+    if (donutRed) {
+      donutRed.setAttribute(
+        "stroke-dasharray",
+        `${redLen} ${totalCircumference}`,
+      );
+      donutRed.setAttribute("stroke-dashoffset", `-${greenLen + yellowLen}`);
+    }
   }
 
+  // 2. KPI Cards
   const kpiContainer = document.getElementById("kpi-container");
   if (kpiContainer && cats.serviceCategories) {
     kpiContainer.innerHTML = "";
@@ -776,6 +1067,13 @@ function renderDashboardPage(dashData) {
             </div>
         </div>`;
   }
+
+  // 3. Target vs Performance Radar Chart
+  if (cats && cats.serviceCategories) {
+    renderRadarChart(cats.serviceCategories, "radar-container");
+  }
+
+  // 4. Target vs Performance Table
   const targetBody = document.getElementById("target-table-body");
   if (targetBody && cats.serviceCategories) {
     targetBody.innerHTML = "";
@@ -799,6 +1097,7 @@ function renderDashboardPage(dashData) {
     });
   }
 
+  // 5. Staff Table
   const staffBody = document.getElementById("staff-body");
   if (staffBody && dashData.staffs) {
     staffBody.innerHTML = "";
@@ -830,82 +1129,96 @@ function renderDashboardPage(dashData) {
 function renderComboChart(subject, competitors) {
   const container = document.getElementById("combo-chart");
   if (!container) return;
+
   const allHotels = [subject, ...competitors];
   const maxReviews = Math.max(
+    10,
     ...allHotels.map((h) => h.wtkSummary.review_count || 0),
   );
-  const yMax = Math.ceil(maxReviews / 10) * 10 || 10;
-  let yAxisLeft = `<div style="grid-row: 1 / 2; grid-column: 1 / 2; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-right: 10px;">
-    <span style="font-weight: 600; color: #555">No. of reviews</span>`;
-
-  for (let i = 5; i >= 0; i--) {
-    yAxisLeft += `<span>${Math.round((yMax / 5) * i)}</span>`;
-  }
-  yAxisLeft += `</div>`;
-  const barCount = allHotels.length;
+  const yMax = Math.ceil(maxReviews / 10) * 10;
+  let yAxisLeft = `
+    <div style="grid-row: 1 / 2; grid-column: 1 / 2; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-right: 10px;">
+      <span style="font-weight: 600; color: #555">No. of reviews</span>
+      <span>${yMax}</span>
+      <span>${Math.round(yMax * 0.8)}</span>
+      <span>${Math.round(yMax * 0.6)}</span>
+      <span>${Math.round(yMax * 0.4)}</span>
+      <span>${Math.round(yMax * 0.2)}</span>
+      <span>0</span>
+    </div>`;
   let barsHtml = "";
-  let polylinePoints = "";
+  let polyPoints = [];
+  const svgWidth = 500;
+  const svgHeight = 230;
 
-  allHotels.forEach((h, index) => {
+  allHotels.forEach((h, i) => {
     const reviews = h.wtkSummary.review_count || 0;
     const score = h.wtkSummary.overall_score_avg || 0;
-    const barHeightPx = (reviews / yMax) * 200;
-    const bg = index === 0 ? "#1F3B32" : "#3b556e";
+    const heightPct = (reviews / yMax) * 100;
+    const barColor = i === 0 ? "#2faa68" : "#8e7cc3";
 
     barsHtml += `
-      <div style="width: 18px; height: 250px; display: flex; flex-direction: column-reverse; padding-bottom: 30px;">
-        <div style="height: ${barHeightPx}px; background: ${bg}; border-radius: 2px 2px 0 0;" title="${reviews} Reviews"></div>
+      <div style="width: 22px; height: 100%; display: flex; flex-direction: column-reverse; align-items: center;">
+        <div style="height: ${heightPct}%; width: 100%; background: ${barColor}; border-radius: 2px 2px 0 0;" title="${reviews} Reviews"></div>
       </div>`;
-    const x = ((index + 0.5) / barCount) * 500;
-    const y = 250 - (score / 10) * 230;
-
-    polylinePoints += `${x},${y} `;
+    const x = (svgWidth / allHotels.length) * (i + 0.5);
+    const y = svgHeight - (score / 10) * svgHeight;
+    polyPoints.push(`${x},${y}`);
   });
 
-  const chartArea = `
+  const polylinePoints = polyPoints.join(" ");
+  const circles = polyPoints
+    .map((p) => {
+      const [x, y] = p.split(",");
+      return `<circle cx="${x}" cy="${y}" r="2.5" fill="#4472C4" />`;
+    })
+    .join("");
+  let chartArea = `
     <div style="grid-row: 1 / 2; grid-column: 2 / 3; position: relative; height: 250px;">
       <div style="position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-top: 20px;">
-        <div style="width: 100%; height: 1px; background: #eee"></div>
-        <div style="width: 100%; height: 1px; background: #eee"></div>
-        <div style="width: 100%; height: 1px; background: #eee"></div>
-        <div style="width: 100%; height: 1px; background: #eee"></div>
-        <div style="width: 100%; height: 1px; background: #eee"></div>
-        <div style="width: 100%; height: 1px; background: #ccc"></div>
+        ${[...Array(6)].map(() => `<div style="width: 100%; height: 1px; background: #eee"></div>`).join("")}
       </div>
 
-      <div style="position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
+      <div style="position: absolute; width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end; padding: 0; top: 20px; height: 230px;">
         ${barsHtml}
       </div>
 
-      <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; overflow: visible;" viewBox="0 0 500 250" preserveAspectRatio="none">
-        <polyline points="${polylinePoints}" fill="none" stroke="#4472C4" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
-        ${polylinePoints
-          .trim()
-          .split(" ")
-          .map(
-            (p) =>
-              `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="4" fill="#4472C4" />`,
-          )
-          .join("")}
+      <svg style="position: absolute; top: 20px; left: 0; width: 100%; height: 230px; z-index: 2; overflow: visible;" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none">
+        <polyline points="${polylinePoints}" fill="none" stroke="#4472C4" stroke-width="2" vector-effect="non-scaling-stroke" />
+        ${circles}
       </svg>
     </div>`;
-  const yAxisRight = `
+
+  // 3. Right Y-Axis (Score 10 to 0)
+  let yAxisRight = `
     <div style="grid-row: 1 / 2; grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: #888; height: 250px; padding-top: 20px; padding-left: 10px;">
       <span style="font-weight: 600; color: #555">Score</span>
       <span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
     </div>`;
-  let xAxis = `<div style="grid-row: 2 / 3; grid-column: 2 / 3; display: flex; justify-content: space-around; font-size: 10px; color: #555; margin-top: 5px; text-align: center;">`;
+
+  // 4. X-Axis (Hotel Names - Truncated)
+  let xAxis = `<div style="grid-row: 2 / 3; grid-column: 2 / 3; display: flex; justify-content: space-around; font-size: 10px; color: #555; margin-top: 10px; text-align: center;">`;
   allHotels.forEach((h) => {
-    let shortName = h.basicInfo.hotelName.substring(0, 10) + "..";
-    xAxis += `<span style="width: 18%;">${shortName}</span>`;
+    const name = h.basicInfo.hotelName;
+    const shortName = name.length > 12 ? name.substring(0, 12) + "..." : name;
+    xAxis += `<span style="width: ${100 / allHotels.length}%;" title="${name}">${shortName}</span>`;
   });
   xAxis += `</div>`;
-  container.innerHTML = yAxisLeft + chartArea + yAxisRight + xAxis;
-  container.innerHTML += `
-    <div style="grid-row: 3 / 4; grid-column: 1 / 4; display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 11px; color: #666;">
-       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#1F3B32"></div> Review Vol (Subject)</div>
-       <div style="display: flex; align-items: center; gap: 5px"><div style="width:12px; height:12px; background:#3b556e"></div> Review Vol (Comp)</div>
-       <div style="display: flex; align-items: center; gap: 5px"><div style="width:16px; height:2px; background:#4472C4"></div> Score Trend</div>
+
+  // 5. Dynamic Legend
+  const legend = `
+    <div style="grid-row: 3 / 4; grid-column: 1 / 4; display: flex; justify-content: center; gap: 25px; margin-top: 20px; font-size: 11px; color: #666;">
+       <div style="display: flex; align-items: center; gap: 6px"><i style="width:12px; height:12px; background:#2faa68; border-radius:2px;"></i> Review Vol (Subject)</div>
+       <div style="display: flex; align-items: center; gap: 6px"><i style="width:12px; height:12px; background:#8e7cc3; border-radius:2px;"></i> Review Vol (Competitor)</div>
+       <div style="display: flex; align-items: center; gap: 6px">
+          <div style="width:18px; height:2px; background:#4472C4; display:flex; align-items:center; justify-content:center;">
+            <div style="width:6px; height:6px; background:#4472C4; border-radius:50%;"></div>
+          </div> Overall Score
+       </div>
     </div>
   `;
+
+  // Inject everything into the container
+  container.innerHTML = yAxisLeft + chartArea + yAxisRight + xAxis + legend;
+  container.style.gridTemplateRows = "auto auto auto"; // Fix the grid sizing
 }

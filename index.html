@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
@@ -121,39 +121,9 @@
             <h3 class="dash-h3">Dashboard Overview</h3>
             <div class="donut-container">
               <svg viewBox="0 0 280 140" class="donut-svg">
-                <circle
-                  cx="140"
-                  cy="140"
-                  r="110"
-                  fill="none"
-                  stroke="#2FAA68"
-                  stroke-width="30"
-                  stroke-dasharray="200.4 490.6"
-                  stroke-dashoffset="0"
-                  transform="rotate(-180 140 140)"
-                ></circle>
-                <circle
-                  cx="140"
-                  cy="140"
-                  r="110"
-                  fill="none"
-                  stroke="#EFB82C"
-                  stroke-width="30"
-                  stroke-dasharray="76 615"
-                  stroke-dashoffset="-200.4"
-                  transform="rotate(-180 140 140)"
-                ></circle>
-                <circle
-                  cx="140"
-                  cy="140"
-                  r="110"
-                  fill="none"
-                  stroke="#CE4049"
-                  stroke-width="30"
-                  stroke-dasharray="69.1 622"
-                  stroke-dashoffset="-276.4"
-                  transform="rotate(-180 140 140)"
-                ></circle>
+                <circle id="donut-green" cx="140" cy="140" r="110" fill="none" stroke="#2FAA68" stroke-width="30" stroke-dasharray="0 691.15" stroke-dashoffset="0" transform="rotate(-180 140 140)"></circle>
+                <circle id="donut-yellow" cx="140" cy="140" r="110" fill="none" stroke="#EFB82C" stroke-width="30" stroke-dasharray="0 691.15" stroke-dashoffset="0" transform="rotate(-180 140 140)"></circle>
+                <circle id="donut-red" cx="140" cy="140" r="110" fill="none" stroke="#CE4049" stroke-width="30" stroke-dasharray="0 691.15" stroke-dashoffset="0" transform="rotate(-180 140 140)"></circle>
               </svg>
               <div class="big-score" id="dash-score">--</div>
               <div class="donut-labels">
@@ -230,135 +200,16 @@
         <h3 class="dash-h3">Target vs Performance ²</h3>
         <div class="target-perf-wrapper">
           <div class="target-perf-container">
-            <div class="chart-col">
-              <svg
-                viewBox="-50 0 600 450"
-                width="100%"
-                style="overflow: visible"
-              >
-                <style>
-                  .radar-text {
-                    font-size: 13px;
-                    fill: #444;
-                    font-family: "Inter", sans-serif;
-                    font-weight: 700;
-                  }
-                  /* Tspan specifically for multi-line alignment */
-                  .radar-text tspan {
-                    font-weight: 700;
-                  }
-                  .radar-grid {
-                    fill: none;
-                    stroke: #e5e5e5;
-                    stroke-width: 1.2;
-                  }
-                  .radar-axis {
-                    stroke: #e5e5e5;
-                    stroke-width: 1.2;
-                  }
-                  .goal-path {
-                    fill: rgba(111, 168, 220, 0.1);
-                    stroke: #6fa8dc;
-                    stroke-width: 2.5;
-                  }
-                  .goal-point {
-                    fill: #6fa8dc;
-                  }
-                  .perf-path {
-                    fill: rgba(142, 124, 195, 0.1);
-                    stroke: #8e7cc3;
-                    stroke-width: 2.5;
-                  }
-                  .perf-point {
-                    fill: #8e7cc3;
-                  }
-                </style>
+           <div class="chart-col">
+              <div id="radar-container" style="width: 100%; max-width: 550px; margin: 0 auto;">
+              </div>
 
-                <g transform="translate(250, 200)">
-                  <line x1="0" y1="0" x2="0" y2="-150" class="radar-axis" />
-                  <line x1="0" y1="0" x2="117" y2="-94" class="radar-axis" />
-                  <line x1="0" y1="0" x2="146" y2="33" class="radar-axis" />
-                  <line x1="0" y1="0" x2="65" y2="135" class="radar-axis" />
-                  <line x1="0" y1="0" x2="-65" y2="135" class="radar-axis" />
-                  <line x1="0" y1="0" x2="-146" y2="33" class="radar-axis" />
-                  <line x1="0" y1="0" x2="-117" y2="-94" class="radar-axis" />
-
-                  <path
-                    d="M0 -150 L117 -94 L146 33 L65 135 L-65 135 L-146 33 L-117 -94 Z"
-                    class="radar-grid"
-                  />
-                  <path
-                    d="M0 -112 L88 -70 L109 25 L49 101 L-49 101 L-109 25 L-88 -70 Z"
-                    class="radar-grid"
-                  />
-                  <path
-                    d="M0 -75 L58 -47 L73 16 L32 67 L-32 67 L-73 16 L-58 -47 Z"
-                    class="radar-grid"
-                  />
-                  <path
-                    d="M0 -37 L29 -23 L36 8 L16 33 L-16 33 L-36 8 L-29 -23 Z"
-                    class="radar-grid"
-                  />
-
-                  <path
-                    d="M0 -115 L90 -72 L112 25 L50 103 L-50 103 L-112 25 L-90 -72 Z"
-                    class="goal-path"
-                  />
-                  <circle cx="0" cy="-115" r="4" class="goal-point" />
-                  <circle cx="90" cy="-72" r="4" class="goal-point" />
-                  <circle cx="112" cy="25" r="4" class="goal-point" />
-                  <circle cx="50" cy="103" r="4" class="goal-point" />
-                  <circle cx="-50" cy="103" r="4" class="goal-point" />
-                  <circle cx="-112" cy="25" r="4" class="goal-point" />
-                  <circle cx="-90" cy="-72" r="4" class="goal-point" />
-
-                  <path
-                    d="M0 -125 L92 -74 L100 23 L53 109 L-35 78 L-96 21 L-65 -54 Z"
-                    class="perf-path"
-                  />
-                  <circle cx="0" cy="-125" r="4" class="perf-point" />
-                  <circle cx="92" cy="-74" r="4" class="perf-point" />
-                  <circle cx="100" cy="23" r="4" class="perf-point" />
-                  <circle cx="53" cy="109" r="4" class="perf-point" />
-                  <circle cx="-35" cy="78" r="4" class="perf-point" />
-                  <circle cx="-96" cy="21" r="4" class="perf-point" />
-                  <circle cx="-65" cy="-54" r="4" class="perf-point" />
-                </g>
-
-                <text x="250" y="30" text-anchor="middle" class="radar-text">
-                  Location & Neighbourhood
-                </text>
-                <text x="380" y="90" text-anchor="start" class="radar-text">
-                  Cleanliness
-                </text>
-                <text x="410" y="240" text-anchor="start" class="radar-text">
-                  Room Comfort
-                </text>
-                <text x="120" y="90" text-anchor="end" class="radar-text">
-                  Value for Money
-                </text>
-
-                <text x="330" y="355" text-anchor="middle" class="radar-text">
-                  <tspan x="330" dy="0">Hotel Amenities</tspan>
-                  <tspan x="330" dy="16">& Atmosphere</tspan>
-                </text>
-
-                <text x="170" y="360" text-anchor="middle" class="radar-text">
-                  Food & Beverage
-                </text>
-
-                <text x="80" y="240" text-anchor="end" class="radar-text">
-                  <tspan x="80" dy="0">Guest Experience</tspan>
-                  <tspan x="80" dy="16">& Service</tspan>
-                </text>
-              </svg>
-
-              <div class="radar-legend">
+              <div class="radar-legend" style="margin-top: 20px;">
                 <span class="legend-item"
-                  ><i class="leg-box bg-blue"></i>Goals</span
+                  ><i class="leg-box bg-blue" style="background: #6fa8dc"></i>Goals</span
                 >
                 <span class="legend-item"
-                  ><i class="leg-box bg-purple"></i>Performance</span
+                  ><i class="leg-box bg-purple" style="background: #8e7cc3"></i>Performance</span
                 >
               </div>
             </div>
